@@ -33,7 +33,11 @@ const UserPortalLayout = () => {
       id: 'manage-users',
       label: 'Gerenciar Usuários',
       icon: Users,
-      component: () => <div className="p-6"><h1 className="text-2xl font-bold">Gestão de Usuários do Grupo - Em desenvolvimento</h1></div>,
+      component: () => (
+        <div className="p-6">
+          <h1 className="text-2xl font-bold">Gestão de Usuários do Grupo - Em desenvolvimento</h1>
+        </div>
+      ),
     });
   }
 

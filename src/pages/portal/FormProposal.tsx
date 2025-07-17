@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,13 +24,13 @@ const FormProposal = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="w-full max-w-none space-y-6 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Formulário de Proposta</h1>
         <p className="text-gray-600 mt-2">Preencha suas informações diretamente no portal</p>
       </div>
 
-      <Card className="border-0 shadow-lg">
+      <Card className="border-0 shadow-lg w-full">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -54,9 +55,9 @@ const FormProposal = () => {
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {!formLoaded && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mx-6 mb-4">
               <div className="flex items-center space-x-2">
                 <AlertCircle className="h-5 w-5 text-yellow-600" />
                 <p className="text-sm text-yellow-800">
@@ -74,7 +75,7 @@ const FormProposal = () => {
           
           <div className="relative w-full" style={{ minHeight: '800px' }}>
             {!formLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-lg">
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-lg mx-6">
                 <div className="text-center">
                   <RefreshCw className="h-8 w-8 text-gray-400 animate-spin mx-auto mb-2" />
                   <p className="text-gray-500">Carregando formulário...</p>
@@ -91,8 +92,7 @@ const FormProposal = () => {
               scrolling="yes"
               onLoad={handleFormLoad}
               onError={handleFormError}
-              className="rounded-lg shadow-sm"
-              style={{ maxWidth: '100%', width: '100%' }}
+              className="w-full rounded-lg shadow-sm"
               title="Formulário de Proposta"
             />
           </div>

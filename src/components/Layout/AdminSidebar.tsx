@@ -19,6 +19,9 @@ import {
   Newspaper,
   FileText,
   LogOut,
+  Menu,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -32,7 +35,7 @@ const adminMenuItems = [
 ];
 
 const AdminSidebar = () => {
-  const { state } = useSidebar();
+  const { state, toggleSidebar } = useSidebar();
   const location = useLocation();
   const { signOut } = useAuth();
   const currentPath = location.pathname;
@@ -47,7 +50,22 @@ const AdminSidebar = () => {
   return (
     <Sidebar className={`${state === 'collapsed' ? 'w-16' : 'w-64'} libra-sidebar`}>
       <SidebarContent>
-        <div className="p-6 border-b border-sidebar-border">
+        {/* Toggle Button fixo no topo */}
+        <div className="flex items-center justify-between p-4 border-b border-sidebar-border bg-sidebar">
+          <Button
+            onClick={toggleSidebar}
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 hover:bg-accent hover:text-accent-foreground transition-colors"
+            title={state === 'collapsed' ? 'Expandir menu' : 'Recolher menu'}
+          >
+            {state === 'collapsed' ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </Button>
+          
           {state === 'expanded' && (
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
@@ -57,11 +75,6 @@ const AdminSidebar = () => {
                 <h2 className="text-lg font-bold text-primary">Libra Admin</h2>
                 <p className="text-xs text-muted-foreground">Painel de Controle</p>
               </div>
-            </div>
-          )}
-          {state === 'collapsed' && (
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mx-auto">
-              <span className="text-white font-bold text-sm">L</span>
             </div>
           )}
         </div>
@@ -85,6 +98,7 @@ const AdminSidebar = () => {
                             : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                         }`
                       }
+                      title={state === 'collapsed' ? item.title : undefined}
                     >
                       <item.icon className={`h-5 w-5 ${isActive(item.url) ? 'text-white' : 'text-sidebar-foreground group-hover:text-sidebar-accent-foreground'}`} />
                       {state === 'expanded' && (
@@ -107,6 +121,7 @@ const AdminSidebar = () => {
                 ? 'w-10 h-10 p-0' 
                 : 'w-full justify-start'
             } text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200`}
+            title={state === 'collapsed' ? 'Sair' : undefined}
           >
             <LogOut className="h-4 w-4" />
             {state === 'expanded' && <span className="ml-3 font-medium">Sair</span>}

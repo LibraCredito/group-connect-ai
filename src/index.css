@@ -242,6 +242,24 @@ All colors MUST be HSL.
   .libra-inactive-badge {
     @apply bg-gray-100 text-gray-800 border border-gray-200;
   }
+
+  /* Tooltip personalizado para sidebar colapsada */
+  .sidebar-tooltip {
+    @apply absolute left-full ml-2 px-2 py-1 text-xs bg-gray-900 text-white rounded opacity-0 pointer-events-none transition-opacity z-50;
+  }
+
+  .sidebar-tooltip.show {
+    @apply opacity-100;
+  }
+
+  /* Melhor hover para botões da sidebar */
+  .sidebar-toggle-btn {
+    @apply w-8 h-8 flex items-center justify-center rounded-md border border-border bg-background hover:bg-accent hover:text-accent-foreground transition-all duration-200;
+  }
+
+  .sidebar-toggle-btn:hover {
+    @apply shadow-sm;
+  }
 }
 
 /* Scrollbar personalizada */

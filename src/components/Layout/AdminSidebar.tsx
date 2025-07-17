@@ -2,29 +2,18 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from '@/components/ui/sidebar';
-import {
   LayoutDashboard,
   Users,
   Building2,
   Newspaper,
   FileText,
   LogOut,
-  Menu,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { useSidebar } from '@/components/ui/sidebar';
 
 const adminMenuItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
@@ -48,7 +37,7 @@ const AdminSidebar = () => {
   };
 
   return (
-    <div className={`${state === 'collapsed' ? 'w-16' : 'w-64'} libra-sidebar bg-sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out flex flex-col h-screen fixed left-0 top-0 z-50`}>
+    <div className={`${state === 'collapsed' ? 'w-16' : 'w-64'} libra-sidebar bg-sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out flex flex-col h-full relative`}>
       {/* Header with toggle button */}
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border bg-sidebar min-h-[64px]">
         <Button
@@ -89,12 +78,12 @@ const AdminSidebar = () => {
           
           <nav className="space-y-1">
             {adminMenuItems.map((item) => (
-              <div key={item.title} className="relative">
+              <div key={item.title} className="relative group">
                 <NavLink
                   to={item.url}
                   end={item.url === '/admin'}
                   className={({ isActive }) =>
-                    `flex items-center rounded-lg transition-all duration-200 group relative ${
+                    `flex items-center rounded-lg transition-all duration-200 relative ${
                       state === 'collapsed' 
                         ? 'justify-center p-3 w-12 h-12 mx-auto' 
                         : 'space-x-3 px-3 py-3'
@@ -104,13 +93,19 @@ const AdminSidebar = () => {
                         : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                     }`
                   }
-                  title={state === 'collapsed' ? item.title : undefined}
                 >
-                  <item.icon className={`h-5 w-5 flex-shrink-0 ${isActive(item.url) ? 'text-white' : 'text-sidebar-foreground group-hover:text-sidebar-accent-foreground'}`} />
+                  <item.icon className={`h-5 w-5 flex-shrink-0 ${isActive(item.url) ? 'text-white' : 'text-sidebar-foreground'}`} />
                   {state === 'expanded' && (
                     <span className="font-medium truncate">{item.title}</span>
                   )}
                 </NavLink>
+                
+                {/* Tooltip for collapsed state */}
+                {state === 'collapsed' && (
+                  <div className="absolute left-full top-1/2 transform -translate-y-1/2 ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
+                    {item.title}
+                  </div>
+                )}
               </div>
             ))}
           </nav>
@@ -119,19 +114,27 @@ const AdminSidebar = () => {
 
       {/* Footer with logout button */}
       <div className="p-4 border-t border-sidebar-border">
-        <Button
-          onClick={signOut}
-          variant="ghost"
-          className={`${
-            state === 'collapsed' 
-              ? 'w-10 h-10 p-0 mx-auto' 
-              : 'w-full justify-start'
-          } text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200`}
-          title={state === 'collapsed' ? 'Sair' : undefined}
-        >
-          <LogOut className="h-4 w-4" />
-          {state === 'expanded' && <span className="ml-3 font-medium">Sair</span>}
-        </Button>
+        <div className="relative group">
+          <Button
+            onClick={signOut}
+            variant="ghost"
+            className={`${
+              state === 'collapsed' 
+                ? 'w-10 h-10 p-0 mx-auto' 
+                : 'w-full justify-start'
+            } text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200`}
+          >
+            <LogOut className="h-4 w-4" />
+            {state === 'expanded' && <span className="ml-3 font-medium">Sair</span>}
+          </Button>
+          
+          {/* Tooltip for logout button when collapsed */}
+          {state === 'collapsed' && (
+            <div className="absolute left-full top-1/2 transform -translate-y-1/2 ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
+              Sair
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

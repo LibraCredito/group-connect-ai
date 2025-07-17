@@ -3,13 +3,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import PortalHeader from './PortalHeader';
 import PowerBI from '@/pages/portal/PowerBI';
-import FormProposal from '@/pages/portal/FormProposal';
 import Simulator from '@/pages/portal/Simulator';
 import News from '@/pages/portal/News';
 import Materials from '@/pages/portal/Materials';
 import {
   BarChart3,
-  FileText,
   Calculator,
   Newspaper,
   BookOpen,
@@ -20,8 +18,7 @@ const UserPortalLayout = () => {
   const { user } = useAuth();
 
   const tabs = [
-    { id: 'powerbi', label: 'Power BI', icon: BarChart3, component: PowerBI },
-    { id: 'form', label: 'Formulário de Proposta', icon: FileText, component: FormProposal },
+    { id: 'powerbi', label: 'Dashboard & Formulário', icon: BarChart3, component: PowerBI },
     { id: 'simulator', label: 'Simulador', icon: Calculator, component: Simulator },
     { id: 'news', label: 'Notícias', icon: Newspaper, component: News },
     { id: 'materials', label: 'Material de Apoio', icon: BookOpen, component: Materials },

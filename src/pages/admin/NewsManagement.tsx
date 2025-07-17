@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -280,33 +281,33 @@ const NewsManagement = () => {
                   <span>Nova Notícia</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto libra-card">
+              <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto bg-white">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold text-foreground">
+                  <DialogTitle className="text-xl font-bold text-gray-900">
                     {editingNews ? 'Editar Notícia' : 'Nova Notícia'}
                   </DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="title" className="text-sm font-medium text-foreground">Título *</Label>
+                      <Label htmlFor="title" className="text-sm font-medium text-gray-700">Título *</Label>
                       <Input
                         id="title"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         placeholder="Digite o título da notícia"
-                        className="libra-card border-border"
+                        className="w-full"
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="category" className="text-sm font-medium text-foreground">Categoria *</Label>
+                      <Label htmlFor="category" className="text-sm font-medium text-gray-700">Categoria *</Label>
                       <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                        <SelectTrigger className="libra-card border-border">
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Selecione uma categoria" />
                         </SelectTrigger>
-                        <SelectContent className="libra-card border-border">
+                        <SelectContent>
                           {categories.map((category) => (
                             <SelectItem key={category} value={category}>
                               {category}
@@ -317,24 +318,24 @@ const NewsManagement = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="image_url" className="text-sm font-medium text-foreground">URL da Imagem de Capa *</Label>
+                      <Label htmlFor="image_url" className="text-sm font-medium text-gray-700">URL da Imagem de Capa *</Label>
                       <Input
                         id="image_url"
                         value={formData.image_url}
                         onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                         placeholder="https://exemplo.com/imagem.jpg"
-                        className="libra-card border-border"
+                        className="w-full"
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="status" className="text-sm font-medium text-foreground">Status *</Label>
+                      <Label htmlFor="status" className="text-sm font-medium text-gray-700">Status *</Label>
                       <Select value={formData.status} onValueChange={(value: 'active' | 'inactive') => setFormData({ ...formData, status: value })}>
-                        <SelectTrigger className="libra-card border-border">
+                        <SelectTrigger className="w-full">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="libra-card border-border">
+                        <SelectContent>
                           <SelectItem value="active">Ativa</SelectItem>
                           <SelectItem value="inactive">Inativa</SelectItem>
                         </SelectContent>
@@ -355,28 +356,27 @@ const NewsManagement = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="content" className="text-sm font-medium text-foreground">Conteúdo *</Label>
+                    <Label htmlFor="content" className="text-sm font-medium text-gray-700">Conteúdo *</Label>
                     <Textarea
                       id="content"
                       value={formData.content}
                       onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                       placeholder="Digite o conteúdo da notícia"
-                      rows={12}
-                      className="libra-card border-border"
+                      rows={8}
+                      className="w-full"
                       required
                     />
                   </div>
 
-                  <div className="flex justify-end space-x-3 pt-6 border-t border-border">
+                  <div className="flex justify-end space-x-3 pt-4 border-t">
                     <Button 
                       type="button" 
                       variant="outline" 
                       onClick={() => setIsDialogOpen(false)}
-                      className="libra-button-secondary"
                     >
                       Cancelar
                     </Button>
-                    <Button type="submit" className="libra-button">
+                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
                       {editingNews ? 'Atualizar' : 'Criar'}
                     </Button>
                   </div>

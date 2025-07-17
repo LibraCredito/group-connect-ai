@@ -80,11 +80,13 @@ const AdminSidebar = () => {
         </div>
         
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2">
-            Menu Principal
-          </SidebarGroupLabel>
+          {state === 'expanded' && (
+            <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2">
+              Menu Principal
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1 px-3">
+            <SidebarMenu className={`space-y-1 ${state === 'collapsed' ? 'px-1' : 'px-3'}`}>
               {adminMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
@@ -92,7 +94,11 @@ const AdminSidebar = () => {
                       to={item.url}
                       end={item.url === '/admin'}
                       className={({ isActive }) =>
-                        `flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 group ${
+                        `flex items-center ${
+                          state === 'collapsed' 
+                            ? 'justify-center p-3 w-12 h-12 mx-auto' 
+                            : 'space-x-3 px-3 py-3'
+                        } rounded-lg transition-all duration-200 group ${
                           isActive
                             ? 'bg-primary text-white shadow-md'
                             : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
@@ -118,7 +124,7 @@ const AdminSidebar = () => {
             variant="ghost"
             className={`${
               state === 'collapsed' 
-                ? 'w-10 h-10 p-0' 
+                ? 'w-10 h-10 p-0 mx-auto' 
                 : 'w-full justify-start'
             } text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200`}
             title={state === 'collapsed' ? 'Sair' : undefined}

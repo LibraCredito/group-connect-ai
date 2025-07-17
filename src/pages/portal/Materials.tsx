@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,7 +30,7 @@ const Materials = () => {
       content: 'Este guia aborda todos os aspectos necessários para utilizar efetivamente o Power BI em sua análise de propostas.\n\nTópicos abordados:\n• Introdução ao Power BI\n• Navegação pela interface\n• Criação de filtros personalizados\n• Interpretação de gráficos e métricas\n• Exportação de relatórios\n• Dicas avançadas de análise\n\nPré-requisitos:\n• Acesso ao sistema\n• Conhecimento básico de computação\n• Dados de propostas disponíveis\n\nEste material foi criado para facilitar o aprendizado e maximizar o uso da ferramenta.',
       type: 'pdf',
       url: '/materials/powerbi-guide.pdf',
-      image_url: '/placeholder.svg',
+      image_url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&h=400',
       created_at: '2024-01-15T10:00:00Z',
       updated_at: '2024-01-15T10:00:00Z',
       created_by: 'admin',
@@ -41,7 +42,7 @@ const Materials = () => {
       content: 'Vídeo tutorial prático demonstrando como preencher corretamente os formulários de proposta.\n\nO que você aprenderá:\n• Acesso ao formulário\n• Preenchimento de campos obrigatórios\n• Upload de documentos\n• Validação de dados\n• Envio da proposta\n• Acompanhamento do status\n\nDuração: 15 minutos\nFormato: MP4 (1080p)\nIdioma: Português\n\nEste vídeo foi gravado com a versão mais recente do sistema.',
       type: 'video',
       url: 'https://youtube.com/watch?v=exemplo',
-      image_url: '/placeholder.svg',
+      image_url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&h=400',
       created_at: '2024-01-12T14:30:00Z',
       updated_at: '2024-01-12T14:30:00Z',
       created_by: 'admin',
@@ -52,7 +53,7 @@ const Materials = () => {
       description: 'Respostas para as dúvidas mais comuns sobre o sistema',
       content: 'Aqui estão as perguntas mais frequentes sobre o uso do sistema:\n\n1. Como faço para redefinir minha senha?\nR: Clique em "Esqueci minha senha" na tela de login e siga as instruções.\n\n2. Por que minha proposta foi rejeitada?\nR: Verifique se todos os documentos obrigatórios foram enviados e se as informações estão corretas.\n\n3. Quanto tempo demora para analisar uma proposta?\nR: O tempo médio é de 10-15 dias úteis, dependendo da complexidade.\n\n4. Como posso acompanhar o status da minha proposta?\nR: Acesse o dashboard Power BI onde você pode ver o status em tempo real.\n\n5. Posso editar uma proposta já enviada?\nR: Não, mas você pode enviar uma nova proposta com as correções necessárias.\n\nPara dúvidas não listadas aqui, entre em contato com o administrador.',
       type: 'text',
-      image_url: '/placeholder.svg',
+      image_url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&h=400',
       created_at: '2024-01-10T09:15:00Z',
       updated_at: '2024-01-10T09:15:00Z',
       created_by: 'admin',
@@ -64,7 +65,7 @@ const Materials = () => {
       content: 'Link para a plataforma de treinamentos online com cursos complementares.\n\nCursos disponíveis:\n• Fundamentos de análise de dados\n• Elaboração de propostas eficazes\n• Técnicas de apresentação\n• Gestão de projetos\n• Comunicação empresarial\n\nBenefícios:\n• Certificados de conclusão\n• Acesso vitalício\n• Suporte por email\n• Exercícios práticos\n• Fóruns de discussão\n\nPara acessar, clique no link e use suas credenciais do sistema.',
       type: 'link',
       url: 'https://treinamentos.exemplo.com',
-      image_url: '/placeholder.svg',
+      image_url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&h=400',
       created_at: '2024-01-08T16:45:00Z',
       updated_at: '2024-01-08T16:45:00Z',
       created_by: 'admin',
@@ -118,18 +119,17 @@ const Materials = () => {
     }
   };
 
-  const handleMaterialAction = (material: Material) => {
-    if (material.type === 'link' && material.url) {
-      window.open(material.url, '_blank', 'noopener,noreferrer');
-    } else if (material.type === 'pdf' && material.url) {
-      window.open(material.url, '_blank', 'noopener,noreferrer');
-    } else if (material.type === 'video' && material.url) {
-      window.open(material.url, '_blank', 'noopener,noreferrer');
-    } else {
-      setSelectedMaterial(material);
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'pdf': return 'PDF';
+      case 'video': return 'VÍDEO';
+      case 'link': return 'LINK';
+      case 'text': return 'TEXTO';
+      default: return 'DOCUMENTO';
     }
   };
 
+  // Expanded material view (similar to news)
   if (selectedMaterial) {
     return (
       <div className="space-y-6 animate-fade-in">
@@ -153,7 +153,7 @@ const Materials = () => {
           <CardHeader>
             <div className="flex items-center space-x-2 mb-2">
               <Badge className={getTypeColor(selectedMaterial.type)}>
-                {selectedMaterial.type.toUpperCase()}
+                {getTypeLabel(selectedMaterial.type)}
               </Badge>
             </div>
             <CardTitle className="text-2xl text-gray-900">
@@ -188,14 +188,27 @@ const Materials = () => {
                 {selectedMaterial.content}
               </div>
             </div>
-            {selectedMaterial.url && (
-              <div className="mt-6">
+            {selectedMaterial.url && (selectedMaterial.type === 'pdf' || selectedMaterial.type === 'link') && (
+              <div className="mt-6 flex gap-3">
                 <Button
                   onClick={() => window.open(selectedMaterial.url, '_blank', 'noopener,noreferrer')}
                   className="flex items-center space-x-2"
                 >
                   <Download className="h-4 w-4" />
-                  <span>Acessar Material</span>
+                  <span>
+                    {selectedMaterial.type === 'pdf' ? 'Baixar Material em PDF' : 'Acessar Material'}
+                  </span>
+                </Button>
+              </div>
+            )}
+            {selectedMaterial.type === 'video' && selectedMaterial.url && (
+              <div className="mt-6">
+                <Button
+                  onClick={() => window.open(selectedMaterial.url, '_blank', 'noopener,noreferrer')}
+                  className="flex items-center space-x-2"
+                >
+                  <Video className="h-4 w-4" />
+                  <span>Assistir Vídeo</span>
                 </Button>
               </div>
             )}
@@ -205,6 +218,7 @@ const Materials = () => {
     );
   }
 
+  // Material listing view (similar to news)
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
@@ -228,7 +242,7 @@ const Materials = () => {
                     <div className="flex items-center space-x-2 mb-2">
                       <Badge className={getTypeColor(material.type)}>
                         <TypeIcon className="h-3 w-3 mr-1" />
-                        {material.type.toUpperCase()}
+                        {getTypeLabel(material.type)}
                       </Badge>
                     </div>
                     <CardTitle className="text-xl text-gray-900 mb-2">
@@ -271,30 +285,11 @@ const Materials = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleMaterialAction(material)}
+                      onClick={() => setSelectedMaterial(material)}
                       className="flex items-center space-x-2"
                     >
-                      {material.type === 'link' ? (
-                        <>
-                          <ExternalLink className="h-4 w-4" />
-                          <span>Acessar</span>
-                        </>
-                      ) : material.type === 'pdf' ? (
-                        <>
-                          <Download className="h-4 w-4" />
-                          <span>Baixar</span>
-                        </>
-                      ) : material.type === 'video' ? (
-                        <>
-                          <Video className="h-4 w-4" />
-                          <span>Assistir</span>
-                        </>
-                      ) : (
-                        <>
-                          <Eye className="h-4 w-4" />
-                          <span>Ler mais</span>
-                        </>
-                      )}
+                      <Eye className="h-4 w-4" />
+                      <span>Visualizar</span>
                     </Button>
                   </div>
                 </div>

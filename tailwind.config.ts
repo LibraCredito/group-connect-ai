@@ -26,18 +26,18 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(214 95% 38%)',
-					foreground: 'hsl(0 0% 100%)',
-					50: 'hsl(214 100% 97%)',
-					100: 'hsl(214 95% 93%)',
-					200: 'hsl(213 97% 87%)',
-					300: 'hsl(212 96% 78%)',
-					400: 'hsl(213 94% 68%)',
-					500: 'hsl(214 95% 38%)',
-					600: 'hsl(214 84% 46%)',
-					700: 'hsl(215 79% 39%)',
-					800: 'hsl(215 68% 32%)',
-					900: 'hsl(215 56% 27%)'
+					DEFAULT: 'hsl(216 100% 30%)', // #003399 - Azul Libra
+					foreground: 'hsl(0 0% 100%)', // Branco
+					50: 'hsl(216 100% 97%)',
+					100: 'hsl(216 100% 93%)',
+					200: 'hsl(216 100% 87%)',
+					300: 'hsl(216 100% 78%)',
+					400: 'hsl(216 100% 60%)',
+					500: 'hsl(216 100% 30%)', // #003399
+					600: 'hsl(216 100% 25%)',
+					700: 'hsl(216 100% 20%)',
+					800: 'hsl(216 100% 15%)',
+					900: 'hsl(216 100% 10%)'
 				},
 				secondary: {
 					DEFAULT: 'hsl(210 40% 96.1%)',
@@ -52,8 +52,8 @@ export default {
 					foreground: 'hsl(215.4 16.3% 46.9%)'
 				},
 				accent: {
-					DEFAULT: 'hsl(210 40% 96.1%)',
-					foreground: 'hsl(222.2 47.4% 11.2%)'
+					DEFAULT: 'hsl(216 100% 95%)', // Azul muito claro
+					foreground: 'hsl(216 100% 30%)' // Azul Libra
 				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',

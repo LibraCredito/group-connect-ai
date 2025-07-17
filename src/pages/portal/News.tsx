@@ -1,18 +1,20 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, User, Newspaper } from 'lucide-react';
+import { Calendar, User, Newspaper, ArrowLeft, Eye } from 'lucide-react';
 import { News as NewsType } from '@/types/auth';
 
 const News = () => {
+  const [selectedNews, setSelectedNews] = useState<NewsType | null>(null);
+
   // Dados simulados de notícias
   const newsData: NewsType[] = [
     {
       id: '1',
       title: 'Nova Funcionalidade: Dashboard Avançado',
-      content: 'Estamos felizes em anunciar o lançamento do nosso novo dashboard com funcionalidades avançadas de análise e relatórios em tempo real. Esta atualização inclui gráficos interativos, filtros personalizados e exportação de dados.',
-      image_url: '',
+      content: 'Estamos felizes em anunciar o lançamento do nosso novo dashboard com funcionalidades avançadas de análise e relatórios em tempo real. Esta atualização inclui gráficos interativos, filtros personalizados e exportação de dados.\n\nPrincipais recursos:\n• Visualizações em tempo real\n• Filtros avançados por período e categoria\n• Exportação de dados em múltiplos formatos\n• Interface mais intuitiva e responsiva\n• Relatórios automáticos por email\n\nEsta funcionalidade está disponível para todos os usuários a partir de hoje. Para acessar, clique na aba "Power BI" no menu principal.',
+      image_url: '/placeholder.svg',
       published_at: '2024-01-15T10:00:00Z',
       created_by: 'admin',
       created_at: '2024-01-15T10:00:00Z',
@@ -21,7 +23,8 @@ const News = () => {
     {
       id: '2',
       title: 'Manutenção Programada do Sistema',
-      content: 'Informamos que será realizada uma manutenção programada no sistema no próximo domingo, das 02:00 às 06:00. Durante este período, o acesso poderá ser intermitente. Agradecemos a compreensão.',
+      content: 'Informamos que será realizada uma manutenção programada no sistema no próximo domingo, das 02:00 às 06:00. Durante este período, o acesso poderá ser intermitente. Agradecemos a compreensão.\n\nDetalhes da manutenção:\n• Data: Domingo, 21 de janeiro de 2024\n• Horário: 02:00 às 06:00 (horário de Brasília)\n• Serviços afetados: Login, Dashboard, Formulários\n• Duração estimada: 4 horas\n\nApós a manutenção, o sistema funcionará com melhor performance e estabilidade.',
+      image_url: '/placeholder.svg',
       published_at: '2024-01-12T14:30:00Z',
       created_by: 'admin',
       created_at: '2024-01-12T14:30:00Z',
@@ -30,7 +33,8 @@ const News = () => {
     {
       id: '3',
       title: 'Treinamento: Como Utilizar o Power BI',
-      content: 'Será realizado um treinamento online sobre como utilizar efetivamente o Power BI para análise de propostas. O treinamento acontecerá na próxima quinta-feira, às 14:00. Inscrições abertas.',
+      content: 'Será realizado um treinamento online sobre como utilizar efetivamente o Power BI para análise de propostas. O treinamento acontecerá na próxima quinta-feira, às 14:00. Inscrições abertas.\n\nPrograma do treinamento:\n• Introdução ao Power BI\n• Navegação pela interface\n• Criação de filtros personalizados\n• Interpretação de gráficos e métricas\n• Exportação de relatórios\n• Sessão de perguntas e respostas\n\nPara se inscrever, entre em contato com o administrador do sistema.',
+      image_url: '/placeholder.svg',
       published_at: '2024-01-10T09:15:00Z',
       created_by: 'admin',
       created_at: '2024-01-10T09:15:00Z',
@@ -39,7 +43,8 @@ const News = () => {
     {
       id: '4',
       title: 'Atualização de Segurança Implementada',
-      content: 'Foi implementada uma nova atualização de segurança que fortalece a proteção dos dados dos usuários. Todas as senhas foram criptografadas com algoritmos mais robustos e implementamos autenticação em duas etapas.',
+      content: 'Foi implementada uma nova atualização de segurança que fortalece a proteção dos dados dos usuários. Todas as senhas foram criptografadas com algoritmos mais robustos e implementamos autenticação em duas etapas.\n\nMelhorias implementadas:\n• Criptografia avançada de senhas\n• Sistema de autenticação em duas etapas\n• Monitoramento de acessos suspeitos\n• Backup automático de dados\n• Conformidade com LGPD\n\nNenhuma ação é necessária por parte dos usuários. O sistema funcionará normalmente.',
+      image_url: '/placeholder.svg',
       published_at: '2024-01-08T16:45:00Z',
       created_by: 'admin',
       created_at: '2024-01-08T16:45:00Z',
@@ -71,8 +76,72 @@ const News = () => {
     return `${Math.floor(diffDays / 30)} meses atrás`;
   };
 
+  const truncateContent = (content: string, maxLength: number = 200) => {
+    if (content.length <= maxLength) return content;
+    return content.substring(0, maxLength) + '...';
+  };
+
+  if (selectedNews) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSelectedNews(null)}
+            className="flex items-center space-x-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Voltar</span>
+          </Button>
+          <div className="flex items-center space-x-2">
+            <Newspaper className="h-5 w-5 text-primary" />
+            <h1 className="text-2xl font-bold text-gray-900">Notícias</h1>
+          </div>
+        </div>
+
+        <Card className="border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-gray-900">
+              {selectedNews.title}
+            </CardTitle>
+            <div className="flex items-center space-x-4 text-sm text-gray-500">
+              <div className="flex items-center space-x-1">
+                <Calendar className="h-4 w-4" />
+                <span>{formatDate(selectedNews.published_at)}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <User className="h-4 w-4" />
+                <span>Administrador</span>
+              </div>
+              <Badge variant="secondary" className="text-xs">
+                {getTimeAgo(selectedNews.published_at)}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {selectedNews.image_url && (
+              <div className="mb-6">
+                <img 
+                  src={selectedNews.image_url} 
+                  alt={selectedNews.title}
+                  className="w-full h-64 object-cover rounded-lg"
+                />
+              </div>
+            )}
+            <div className="prose prose-lg max-w-none">
+              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+                {selectedNews.content}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
         <div className="p-2 bg-primary rounded-lg">
           <Newspaper className="h-6 w-6 text-white" />
@@ -109,7 +178,31 @@ const News = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-700 leading-relaxed">{news.content}</p>
+              <div className="flex gap-4">
+                {news.image_url && (
+                  <div className="flex-shrink-0">
+                    <img 
+                      src={news.image_url} 
+                      alt={news.title}
+                      className="w-32 h-24 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <p className="text-gray-700 leading-relaxed mb-4">
+                    {truncateContent(news.content)}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedNews(news)}
+                    className="flex items-center space-x-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    <span>Ler mais</span>
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}

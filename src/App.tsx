@@ -8,7 +8,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import LoginForm from "@/components/LoginForm";
 import AdminSidebar from "@/components/Layout/AdminSidebar";
-import UserSidebar from "@/components/Layout/UserSidebar";
+import UserPortalLayout from "@/components/Layout/UserPortalLayout";
 import Header from "@/components/Layout/Header";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import GroupsManagement from "@/pages/admin/GroupsManagement";
@@ -37,19 +37,23 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
 
   const isAdmin = user.role === 'admin';
 
-  return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
-        {isAdmin ? <AdminSidebar /> : <UserSidebar />}
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 overflow-auto">
-            {children}
-          </main>
+  if (isAdmin) {
+    return (
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-gray-50">
+          <AdminSidebar />
+          <div className="flex-1 flex flex-col">
+            <Header />
+            <main className="flex-1 overflow-auto">
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
-  );
+      </SidebarProvider>
+    );
+  }
+
+  return <UserPortalLayout />;
 };
 
 const AppRoutes = () => {
@@ -72,15 +76,8 @@ const AppRoutes = () => {
         </>
       ) : (
         <>
-          <Route path="/portal/powerbi" element={<PowerBI />} />
-          <Route path="/portal/form" element={<FormProposal />} />
-          <Route path="/portal/simulator" element={<Simulator />} />
-          <Route path="/portal/news" element={<News />} />
-          <Route path="/portal/materials" element={<div className="p-6"><h1 className="text-2xl font-bold">Material de Apoio - Em desenvolvimento</h1></div>} />
-          {user.role === 'coordinator' && (
-            <Route path="/portal/manage-users" element={<div className="p-6"><h1 className="text-2xl font-bold">Gestão de Usuários do Grupo - Em desenvolvimento</h1></div>} />
-          )}
-          <Route path="/" element={<Navigate to="/portal/powerbi" replace />} />
+          <Route path="/" element={<Navigate to="/portal" replace />} />
+          <Route path="/portal/*" element={<div />} />
         </>
       )}
       <Route path="*" element={<NotFound />} />

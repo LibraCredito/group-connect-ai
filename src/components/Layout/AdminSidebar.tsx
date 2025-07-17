@@ -37,7 +37,7 @@ const AdminSidebar = () => {
   };
 
   return (
-    <div className={`${state === 'collapsed' ? 'w-16' : 'w-64'} libra-sidebar bg-sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out flex flex-col h-full relative`}>
+    <div className={`${state === 'collapsed' ? 'w-16' : 'w-64'} libra-sidebar bg-sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out flex flex-col fixed top-0 left-0 h-screen z-40`}>
       {/* Header with toggle button */}
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border bg-sidebar min-h-[64px]">
         <Button

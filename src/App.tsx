@@ -1,11 +1,10 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import LoginForm from "@/components/LoginForm";
 import AdminSidebar from "@/components/Layout/AdminSidebar";
 import UserPortalLayout from "@/components/Layout/UserPortalLayout";
@@ -23,6 +22,24 @@ import Materials from "@/pages/portal/Materials";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
+
+const AdminLayoutContent = ({ children }: { children: React.ReactNode }) => {
+  const { state } = useSidebar();
+  
+  return (
+    <div className="min-h-screen flex w-full bg-gray-50">
+      <AdminSidebar />
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+        state === 'collapsed' ? 'ml-16' : 'ml-64'
+      }`}>
+        <Header />
+        <main className="flex-1 overflow-auto">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+};
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -44,15 +61,9 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
   if (isAdmin) {
     return (
       <SidebarProvider>
-        <div className="min-h-screen flex w-full bg-gray-50">
-          <AdminSidebar />
-          <div className="flex-1 flex flex-col min-w-0">
-            <Header />
-            <main className="flex-1 overflow-auto">
-              {children}
-            </main>
-          </div>
-        </div>
+        <AdminLayoutContent>
+          {children}
+        </AdminLayoutContent>
       </SidebarProvider>
     );
   }

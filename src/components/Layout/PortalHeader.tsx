@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { LogOut, User } from 'lucide-react';
 
 const PortalHeader = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   return (
     <header className="libra-header h-16 flex items-center justify-between px-6">

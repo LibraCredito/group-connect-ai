@@ -125,14 +125,24 @@ const NewsManagement = () => {
     'Anúncios'
   ];
 
-  // Filtrar notícias com base nos filtros aplicados
+  // Filtrar e ordenar notícias com base nos filtros aplicados
   const filteredNews = useMemo(() => {
-    return news.filter(item => {
+    const filtered = news.filter(item => {
       const matchesCategory = filters.category === 'all' || item.category === filters.category;
       const matchesUrgency = !filters.urgency || item.is_urgent;
       const matchesStatus = filters.status === 'all' || item.status === filters.status;
       
       return matchesCategory && matchesUrgency && matchesStatus;
+    });
+
+    // Ordenar: urgentes primeiro (mais recentes primeiro), depois não urgentes (mais recentes primeiro)
+    return filtered.sort((a, b) => {
+      // Se ambas são urgentes ou ambas não são urgentes, ordenar por data (mais recente primeiro)
+      if (a.is_urgent === b.is_urgent) {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+      // Se uma é urgente e a outra não, a urgente vem primeiro
+      return a.is_urgent ? -1 : 1;
     });
   }, [news, filters]);
 
@@ -440,7 +450,7 @@ const NewsManagement = () => {
             </TableHeader>
             <TableBody>
               {filteredNews.map((item) => (
-                <TableRow key={item.id}>
+                <TableRow key={item.id} className={item.is_urgent ? 'bg-red-50 border-l-4 border-red-500' : ''}>
                   <TableCell>
                     <img 
                       src={item.image_url} 
@@ -448,7 +458,17 @@ const NewsManagement = () => {
                       className="w-16 h-12 object-cover rounded"
                     />
                   </TableCell>
-                  <TableCell className="font-medium">{item.title}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center space-x-2">
+                      {item.is_urgent && (
+                        <div className="flex items-center space-x-1 text-red-600">
+                          <AlertTriangle className="h-4 w-4" />
+                          <span className="text-xs font-bold">🚨</span>
+                        </div>
+                      )}
+                      <span>{item.title}</span>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <Badge variant="secondary">{item.category}</Badge>
                   </TableCell>
@@ -459,9 +479,9 @@ const NewsManagement = () => {
                   </TableCell>
                   <TableCell>
                     {item.is_urgent && (
-                      <Badge variant="destructive" className="flex items-center space-x-1">
+                      <Badge variant="destructive" className="flex items-center space-x-1 bg-red-600">
                         <AlertTriangle className="h-3 w-3" />
-                        <span>Urgente</span>
+                        <span>🚨 Urgente</span>
                       </Badge>
                     )}
                   </TableCell>

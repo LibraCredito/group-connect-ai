@@ -24,7 +24,11 @@ import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const AdminLayoutContent = ({ children }: { children: React.ReactNode }) => {
+interface AdminLayoutContentProps {
+  children: React.ReactNode;
+}
+
+const AdminLayoutContent = ({ children }: AdminLayoutContentProps) => {
   const { state } = useSidebar();
   
   return (

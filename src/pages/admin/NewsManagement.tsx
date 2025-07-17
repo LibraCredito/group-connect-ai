@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Select, 
   SelectContent, 
@@ -47,8 +48,8 @@ import {
   Eye, 
   EyeOff, 
   AlertTriangle,
-  Calendar,
-  User,
+  Filter,
+  X,
   Newspaper
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -106,6 +107,13 @@ const NewsManagement = () => {
     status: 'active' as 'active' | 'inactive',
   });
 
+  // Estados dos filtros
+  const [filters, setFilters] = useState({
+    category: '',
+    urgency: false,
+    status: '',
+  });
+
   const categories = [
     'Sistema',
     'Economia',
@@ -116,6 +124,17 @@ const NewsManagement = () => {
     'Treinamento',
     'Anúncios'
   ];
+
+  // Filtrar notícias com base nos filtros aplicados
+  const filteredNews = useMemo(() => {
+    return news.filter(item => {
+      const matchesCategory = !filters.category || item.category === filters.category;
+      const matchesUrgency = !filters.urgency || item.is_urgent;
+      const matchesStatus = !filters.status || item.status === filters.status;
+      
+      return matchesCategory && matchesUrgency && matchesStatus;
+    });
+  }, [news, filters]);
 
   const resetForm = () => {
     setFormData({
@@ -207,6 +226,14 @@ const NewsManagement = () => {
     });
   };
 
+  const clearFilters = () => {
+    setFilters({
+      category: '',
+      urgency: false,
+      status: '',
+    });
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -237,49 +264,64 @@ const NewsManagement = () => {
               <span>Nova Notícia</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-2xl">
                 {editingNews ? 'Editar Notícia' : 'Nova Notícia'}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Título *</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Digite o título da notícia"
-                  required
-                />
-              </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Título *</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="Digite o título da notícia"
+                    required
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image_url">URL da Imagem de Capa *</Label>
-                <Input
-                  id="image_url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://exemplo.com/imagem.jpg"
-                  required
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="category">Categoria *</Label>
+                  <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category">Categoria *</Label>
-                <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  <Label htmlFor="image_url">URL da Imagem de Capa *</Label>
+                  <Input
+                    id="image_url"
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    placeholder="https://exemplo.com/imagem.jpg"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status *</Label>
+                  <Select value={formData.status} onValueChange={(value: 'active' | 'inactive') => setFormData({ ...formData, status: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Ativa</SelectItem>
+                      <SelectItem value="inactive">Inativa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="flex items-center space-x-2">
@@ -295,26 +337,13 @@ const NewsManagement = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={(value: 'active' | 'inactive') => setFormData({ ...formData, status: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Ativa</SelectItem>
-                    <SelectItem value="inactive">Inativa</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="content">Conteúdo *</Label>
                 <Textarea
                   id="content"
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   placeholder="Digite o conteúdo da notícia"
-                  rows={8}
+                  rows={12}
                   required
                 />
               </div>
@@ -332,9 +361,69 @@ const NewsManagement = () => {
         </Dialog>
       </div>
 
+      {/* Filtros */}
       <Card>
         <CardHeader>
-          <CardTitle>Notícias Cadastradas</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            Filtros
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div className="space-y-2">
+              <Label>Categoria</Label>
+              <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todas as categorias" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todas as categorias</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos os status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todos os status</SelectItem>
+                  <SelectItem value="active">Ativa</SelectItem>
+                  <SelectItem value="inactive">Inativa</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="urgency"
+                checked={filters.urgency}
+                onCheckedChange={(checked) => setFilters({ ...filters, urgency: checked as boolean })}
+              />
+              <Label htmlFor="urgency">Apenas urgentes</Label>
+            </div>
+
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={clearFilters} className="flex items-center gap-2">
+                <X className="h-4 w-4" />
+                Limpar filtros
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Notícias Cadastradas ({filteredNews.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -350,7 +439,7 @@ const NewsManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {news.map((item) => (
+              {filteredNews.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>
                     <img 

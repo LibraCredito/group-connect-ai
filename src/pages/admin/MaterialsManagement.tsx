@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,7 +48,9 @@ import {
   BookOpen,
   Video,
   CheckSquare,
-  Monitor
+  Monitor,
+  Filter,
+  X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -100,6 +102,12 @@ const MaterialsManagement = () => {
     pdf_url: '',
   });
 
+  // Estados dos filtros
+  const [filters, setFilters] = useState({
+    category: '',
+    hasPdf: '', // 'all', 'with_pdf', 'without_pdf'
+  });
+
   const categories = [
     'Manual',
     'Tutorial',
@@ -110,6 +118,28 @@ const MaterialsManagement = () => {
     'Documentação',
     'Treinamento'
   ];
+
+  const pdfOptions = [
+    { value: '', label: 'Todos' },
+    { value: 'with_pdf', label: 'Com PDF' },
+    { value: 'without_pdf', label: 'Sem PDF' }
+  ];
+
+  // Filtrar materiais com base nos filtros aplicados
+  const filteredMaterials = useMemo(() => {
+    return materials.filter(item => {
+      const matchesCategory = !filters.category || item.category === filters.category;
+      
+      let matchesPdf = true;
+      if (filters.hasPdf === 'with_pdf') {
+        matchesPdf = !!item.pdf_url;
+      } else if (filters.hasPdf === 'without_pdf') {
+        matchesPdf = !item.pdf_url;
+      }
+      
+      return matchesCategory && matchesPdf;
+    });
+  }, [materials, filters]);
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -197,6 +227,13 @@ const MaterialsManagement = () => {
     });
   };
 
+  const clearFilters = () => {
+    setFilters({
+      category: '',
+      hasPdf: '',
+    });
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -227,72 +264,74 @@ const MaterialsManagement = () => {
               <span>Novo Material</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-2xl">
                 {editingMaterial ? 'Editar Material' : 'Novo Material'}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Título *</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Digite o título do material"
-                  required
-                />
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Título *</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="Digite o título do material"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="category">Categoria *</Label>
+                  <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="image_url">URL da Imagem de Capa *</Label>
+                  <Input
+                    id="image_url"
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    placeholder="https://exemplo.com/imagem.jpg"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="pdf_url">URL do PDF (opcional)</Label>
+                  <Input
+                    id="pdf_url"
+                    value={formData.pdf_url}
+                    onChange={(e) => setFormData({ ...formData, pdf_url: e.target.value })}
+                    placeholder="https://exemplo.com/documento.pdf"
+                  />
+                  <p className="text-sm text-gray-500">
+                    Se fornecido, um botão de download será exibido no material
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="image_url">URL da Imagem de Capa *</Label>
-                <Input
-                  id="image_url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://exemplo.com/imagem.jpg"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="category">Categoria *</Label>
-                <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="pdf_url">URL do PDF (opcional)</Label>
-                <Input
-                  id="pdf_url"
-                  value={formData.pdf_url}
-                  onChange={(e) => setFormData({ ...formData, pdf_url: e.target.value })}
-                  placeholder="https://exemplo.com/documento.pdf"
-                />
-                <p className="text-sm text-gray-500">
-                  Se fornecido, um botão de download será exibido no material
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="content">Conteúdo *</Label>
+                <Label htmlFor="content">Descrição *</Label>
                 <Textarea
                   id="content"
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Digite o conteúdo do material"
-                  rows={8}
+                  placeholder="Digite a descrição do material"
+                  rows={12}
                   required
                 />
               </div>
@@ -310,9 +349,62 @@ const MaterialsManagement = () => {
         </Dialog>
       </div>
 
+      {/* Filtros */}
       <Card>
         <CardHeader>
-          <CardTitle>Materiais Cadastrados</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            Filtros
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div className="space-y-2">
+              <Label>Categoria</Label>
+              <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todas as categorias" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todas as categorias</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Presença de PDF</Label>
+              <Select value={filters.hasPdf} onValueChange={(value) => setFilters({ ...filters, hasPdf: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent>
+                  {pdfOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={clearFilters} className="flex items-center gap-2">
+                <X className="h-4 w-4" />
+                Limpar filtros
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Materiais Cadastrados ({filteredMaterials.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -327,7 +419,7 @@ const MaterialsManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {materials.map((item) => {
+              {filteredMaterials.map((item) => {
                 const CategoryIcon = getCategoryIcon(item.category);
                 return (
                   <TableRow key={item.id}>

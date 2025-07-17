@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, AuthContextType } from '@/types/auth';
 import { toast } from '@/hooks/use-toast';
@@ -8,7 +7,6 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signIn: async () => {},
   signOut: async () => {},
-  refreshUser: async () => {},
 });
 
 export const useAuth = () => {
@@ -89,10 +87,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const refreshUser = async () => {
-    // Implementar refresh do usuário quando integrado com Supabase
-  };
-
   useEffect(() => {
     // Verificar se há usuário salvo no localStorage
     const savedUser = localStorage.getItem('user');
@@ -107,7 +101,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

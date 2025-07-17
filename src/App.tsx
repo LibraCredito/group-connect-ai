@@ -12,6 +12,7 @@ import UserPortalLayout from "@/components/Layout/UserPortalLayout";
 import Header from "@/components/Layout/Header";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import GroupsManagement from "@/pages/admin/GroupsManagement";
+import UsersManagement from "@/pages/admin/UsersManagement";
 import PowerBI from "@/pages/portal/PowerBI";
 import FormProposal from "@/pages/portal/FormProposal";
 import Simulator from "@/pages/portal/Simulator";
@@ -69,7 +70,7 @@ const AppRoutes = () => {
         <>
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/groups" element={<GroupsManagement />} />
-          <Route path="/admin/users" element={<div className="p-6"><h1 className="text-2xl font-bold">Gestão de Usuários - Em desenvolvimento</h1></div>} />
+          <Route path="/admin/users" element={<UsersManagement />} />
           <Route path="/admin/news" element={<div className="p-6"><h1 className="text-2xl font-bold">Gestão de Notícias - Em desenvolvimento</h1></div>} />
           <Route path="/admin/materials" element={<div className="p-6"><h1 className="text-2xl font-bold">Gestão de Materiais - Em desenvolvimento</h1></div>} />
           <Route path="/" element={<Navigate to="/admin" replace />} />

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Users, ExternalLink } from 'lucide-react';
 import { Group } from '@/types/auth';
@@ -81,6 +82,15 @@ const GroupsManagement = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!formData.name.trim()) {
+      toast({
+        title: 'Erro de validação',
+        description: 'O nome do grupo é obrigatório.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     if (editingGroup) {
       // Atualizar grupo existente
       setGroups(groups.map(group => 
@@ -89,7 +99,7 @@ const GroupsManagement = () => {
           : group
       ));
       toast({
-        title: 'Grupo atualizado',
+        title: 'Sucesso!',
         description: 'As informações do grupo foram atualizadas com sucesso.',
       });
     } else {
@@ -102,7 +112,7 @@ const GroupsManagement = () => {
       };
       setGroups([...groups, newGroup]);
       toast({
-        title: 'Grupo criado',
+        title: 'Sucesso!',
         description: 'O novo grupo foi criado com sucesso.',
       });
     }
@@ -113,8 +123,8 @@ const GroupsManagement = () => {
   const handleDelete = (groupId: string) => {
     setGroups(groups.filter(group => group.id !== groupId));
     toast({
-      title: 'Grupo excluído',
-      description: 'O grupo foi removido com sucesso.',
+      title: 'Sucesso!',
+      description: 'O grupo foi excluído com sucesso.',
     });
   };
 
@@ -134,7 +144,7 @@ const GroupsManagement = () => {
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()} className="bg-primary hover:bg-primary-600">
+            <Button onClick={() => handleOpenDialog()} className="bg-primary hover:bg-primary/90 text-white">
               <Plus className="h-4 w-4 mr-2" />
               Novo Grupo
             </Button>
@@ -155,7 +165,7 @@ const GroupsManagement = () => {
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Nome do Grupo</Label>
+                <Label htmlFor="name">Nome do Grupo *</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -208,7 +218,7 @@ const GroupsManagement = () => {
                 <Button type="button" variant="outline" onClick={handleCloseDialog}>
                   Cancelar
                 </Button>
-                <Button type="submit" className="bg-primary hover:bg-primary-600">
+                <Button type="submit" className="bg-primary hover:bg-primary/90">
                   {editingGroup ? 'Atualizar' : 'Criar'} Grupo
                 </Button>
               </div>
@@ -236,14 +246,31 @@ const GroupsManagement = () => {
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(group.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Tem certeza que deseja excluir o grupo "{group.name}"? Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(group.id)} className="bg-red-600 hover:bg-red-700">
+                          Confirmar Exclusão
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </CardHeader>

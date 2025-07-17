@@ -32,7 +32,7 @@ const adminMenuItems = [
 ];
 
 const AdminSidebar = () => {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const location = useLocation();
   const { signOut } = useAuth();
   const currentPath = location.pathname;
@@ -45,10 +45,10 @@ const AdminSidebar = () => {
   };
 
   return (
-    <Sidebar className={`${collapsed ? 'w-14' : 'w-64'} bg-white border-r border-gray-200`}>
+    <Sidebar className={`${state === 'collapsed' ? 'w-14' : 'w-64'} bg-white border-r border-gray-200`}>
       <SidebarContent>
         <div className="p-4">
-          {!collapsed && (
+          {state === 'expanded' && (
             <h2 className="text-lg font-bold text-primary">Painel Admin</h2>
           )}
         </div>
@@ -70,7 +70,7 @@ const AdminSidebar = () => {
                       }`}
                     >
                       <item.icon className="h-5 w-5" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {state === 'expanded' && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -83,10 +83,10 @@ const AdminSidebar = () => {
           <Button
             onClick={signOut}
             variant="outline"
-            className={`${collapsed ? 'w-10 h-10 p-0' : 'w-full'} text-red-600 border-red-200 hover:bg-red-50`}
+            className={`${state === 'collapsed' ? 'w-10 h-10 p-0' : 'w-full'} text-red-600 border-red-200 hover:bg-red-50`}
           >
             <LogOut className="h-4 w-4" />
-            {!collapsed && <span className="ml-2">Sair</span>}
+            {state === 'expanded' && <span className="ml-2">Sair</span>}
           </Button>
         </div>
       </SidebarContent>

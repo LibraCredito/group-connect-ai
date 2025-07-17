@@ -109,9 +109,9 @@ const NewsManagement = () => {
 
   // Estados dos filtros
   const [filters, setFilters] = useState({
-    category: '',
+    category: 'all',
     urgency: false,
-    status: '',
+    status: 'all',
   });
 
   const categories = [
@@ -128,9 +128,9 @@ const NewsManagement = () => {
   // Filtrar notícias com base nos filtros aplicados
   const filteredNews = useMemo(() => {
     return news.filter(item => {
-      const matchesCategory = !filters.category || item.category === filters.category;
+      const matchesCategory = filters.category === 'all' || item.category === filters.category;
       const matchesUrgency = !filters.urgency || item.is_urgent;
-      const matchesStatus = !filters.status || item.status === filters.status;
+      const matchesStatus = filters.status === 'all' || item.status === filters.status;
       
       return matchesCategory && matchesUrgency && matchesStatus;
     });
@@ -228,9 +228,9 @@ const NewsManagement = () => {
 
   const clearFilters = () => {
     setFilters({
-      category: '',
+      category: 'all',
       urgency: false,
-      status: '',
+      status: 'all',
     });
   };
 
@@ -378,7 +378,7 @@ const NewsManagement = () => {
                   <SelectValue placeholder="Todas as categorias" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as categorias</SelectItem>
+                  <SelectItem value="all">Todas as categorias</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}
@@ -395,7 +395,7 @@ const NewsManagement = () => {
                   <SelectValue placeholder="Todos os status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os status</SelectItem>
+                  <SelectItem value="all">Todos os status</SelectItem>
                   <SelectItem value="active">Ativa</SelectItem>
                   <SelectItem value="inactive">Inativa</SelectItem>
                 </SelectContent>

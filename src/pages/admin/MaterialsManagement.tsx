@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -245,248 +244,280 @@ const MaterialsManagement = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-primary rounded-lg">
-            <BookOpen className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Gestão de Materiais de Apoio</h1>
-            <p className="text-gray-600">Gerencie os materiais de apoio do sistema</p>
+    <div className="min-h-screen bg-background">
+      <div className="libra-header bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="libra-page-header">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center libra-button">
+                  <BookOpen className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="libra-page-title">Gestão de Materiais de Apoio</h1>
+                  <p className="libra-page-description">Gerencie os materiais de apoio e documentação do sistema</p>
+                </div>
+              </div>
+            </div>
+            
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  onClick={() => handleOpenDialog()} 
+                  className="libra-button flex items-center space-x-2 px-6 py-3"
+                >
+                  <Plus className="h-5 w-5" />
+                  <span>Novo Material</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto libra-card">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold text-foreground">
+                    {editingMaterial ? 'Editar Material' : 'Novo Material'}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="title" className="text-sm font-medium text-foreground">Título *</Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        placeholder="Digite o título do material"
+                        className="libra-card border-border"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="category" className="text-sm font-medium text-foreground">Categoria *</Label>
+                      <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                        <SelectTrigger className="libra-card border-border">
+                          <SelectValue placeholder="Selecione uma categoria" />
+                        </SelectTrigger>
+                        <SelectContent className="libra-card border-border">
+                          {categories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="image_url" className="text-sm font-medium text-foreground">URL da Imagem de Capa *</Label>
+                      <Input
+                        id="image_url"
+                        value={formData.image_url}
+                        onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                        placeholder="https://exemplo.com/imagem.jpg"
+                        className="libra-card border-border"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="pdf_url" className="text-sm font-medium text-foreground">URL do PDF (opcional)</Label>
+                      <Input
+                        id="pdf_url"
+                        value={formData.pdf_url}
+                        onChange={(e) => setFormData({ ...formData, pdf_url: e.target.value })}
+                        placeholder="https://exemplo.com/documento.pdf"
+                        className="libra-card border-border"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Se fornecido, um botão de download será exibido no material
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="content" className="text-sm font-medium text-foreground">Descrição *</Label>
+                    <Textarea
+                      id="content"
+                      value={formData.content}
+                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                      placeholder="Digite a descrição do material"
+                      rows={12}
+                      className="libra-card border-border"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-6 border-t border-border">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsDialogOpen(false)}
+                      className="libra-button-secondary"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button type="submit" className="libra-button">
+                      {editingMaterial ? 'Atualizar' : 'Criar'}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
-        
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()} className="flex items-center space-x-2">
-              <Plus className="h-4 w-4" />
-              <span>Novo Material</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-2xl">
-                {editingMaterial ? 'Editar Material' : 'Novo Material'}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Título *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Digite o título do material"
-                    required
-                  />
-                </div>
+      </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="category">Categoria *</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="image_url">URL da Imagem de Capa *</Label>
-                  <Input
-                    id="image_url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    placeholder="https://exemplo.com/imagem.jpg"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="pdf_url">URL do PDF (opcional)</Label>
-                  <Input
-                    id="pdf_url"
-                    value={formData.pdf_url}
-                    onChange={(e) => setFormData({ ...formData, pdf_url: e.target.value })}
-                    placeholder="https://exemplo.com/documento.pdf"
-                  />
-                  <p className="text-sm text-gray-500">
-                    Se fornecido, um botão de download será exibido no material
-                  </p>
-                </div>
+      <div className="max-w-7xl mx-auto px-6 py-8 libra-section">
+        {/* Filtros */}
+        <Card className="libra-filter-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-foreground">
+              <Filter className="h-5 w-5 text-primary" />
+              Filtros de Busca
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">Categoria</Label>
+                <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value })}>
+                  <SelectTrigger className="libra-card border-border">
+                    <SelectValue placeholder="Todas as categorias" />
+                  </SelectTrigger>
+                  <SelectContent className="libra-card border-border">
+                    <SelectItem value="all">Todas as categorias</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="content">Descrição *</Label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Digite a descrição do material"
-                  rows={12}
-                  required
-                />
+                <Label className="text-sm font-medium text-foreground">Presença de PDF</Label>
+                <Select value={filters.hasPdf} onValueChange={(value) => setFilters({ ...filters, hasPdf: value })}>
+                  <SelectTrigger className="libra-card border-border">
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent className="libra-card border-border">
+                    {pdfOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  {editingMaterial ? 'Atualizar' : 'Criar'}
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={clearFilters} 
+                  className="libra-button-secondary flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Limpar filtros
                 </Button>
               </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Filtros */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filtros
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            <div className="space-y-2">
-              <Label>Categoria</Label>
-              <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Todas as categorias" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as categorias</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="space-y-2">
-              <Label>Presença de PDF</Label>
-              <Select value={filters.hasPdf} onValueChange={(value) => setFilters({ ...filters, hasPdf: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos" />
-                </SelectTrigger>
-                <SelectContent>
-                  {pdfOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={clearFilters} className="flex items-center gap-2">
-                <X className="h-4 w-4" />
-                Limpar filtros
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Materiais Cadastrados ({filteredMaterials.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Imagem</TableHead>
-                <TableHead>Título</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>PDF</TableHead>
-                <TableHead>Criado em</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredMaterials.map((item) => {
-                const CategoryIcon = getCategoryIcon(item.category);
-                return (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <img 
-                        src={item.image_url} 
-                        alt={item.title}
-                        className="w-16 h-12 object-cover rounded"
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">{item.title}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="flex items-center space-x-1 w-fit">
-                        <CategoryIcon className="h-3 w-3" />
-                        <span>{item.category}</span>
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {item.pdf_url ? (
-                        <Badge variant="default" className="flex items-center space-x-1 w-fit">
-                          <Download className="h-3 w-3" />
-                          <span>Disponível</span>
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">Sem PDF</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>{formatDate(item.created_at)}</TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenDialog(item)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Tem certeza que deseja excluir este material? Esta ação não pode ser desfeita.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(item.id)}>
-                                Excluir
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
+        <Card className="libra-data-card">
+          <CardHeader>
+            <CardTitle className="text-foreground">
+              Materiais Cadastrados ({filteredMaterials.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="libra-table">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-border">
+                    <TableHead className="font-semibold text-foreground">Imagem</TableHead>
+                    <TableHead className="font-semibold text-foreground">Título</TableHead>
+                    <TableHead className="font-semibold text-foreground">Categoria</TableHead>
+                    <TableHead className="font-semibold text-foreground">PDF</TableHead>
+                    <TableHead className="font-semibold text-foreground">Criado em</TableHead>
+                    <TableHead className="font-semibold text-foreground">Ações</TableHead>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {filteredMaterials.map((item) => {
+                    const CategoryIcon = getCategoryIcon(item.category);
+                    return (
+                      <TableRow key={item.id} className="libra-table-row border-b border-border">
+                        <TableCell>
+                          <img 
+                            src={item.image_url} 
+                            alt={item.title}
+                            className="w-16 h-12 object-cover rounded-lg shadow-sm"
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium text-foreground">{item.title}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="libra-status-badge flex items-center space-x-1 w-fit">
+                            <CategoryIcon className="h-3 w-3" />
+                            <span>{item.category}</span>
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {item.pdf_url ? (
+                            <Badge variant="default" className="libra-active-badge flex items-center space-x-1 w-fit">
+                              <Download className="h-3 w-3" />
+                              <span>Disponível</span>
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="libra-inactive-badge">Sem PDF</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{formatDate(item.created_at)}</TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenDialog(item)}
+                              className="libra-button-icon"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="libra-button-icon text-red-600 hover:text-red-700 hover:bg-red-50">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="libra-card">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
+                                  <AlertDialogDescription className="text-muted-foreground">
+                                    Tem certeza que deseja excluir este material? Esta ação não pode ser desfeita.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="libra-button-secondary">Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => handleDelete(item.id)}
+                                    className="bg-red-600 hover:bg-red-700 text-white"
+                                  >
+                                    Excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

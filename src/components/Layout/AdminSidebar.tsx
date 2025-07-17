@@ -45,32 +45,51 @@ const AdminSidebar = () => {
   };
 
   return (
-    <Sidebar className={`${state === 'collapsed' ? 'w-14' : 'w-64'} bg-white border-r border-gray-200`}>
+    <Sidebar className={`${state === 'collapsed' ? 'w-16' : 'w-64'} libra-sidebar`}>
       <SidebarContent>
-        <div className="p-4">
+        <div className="p-6 border-b border-sidebar-border">
           {state === 'expanded' && (
-            <h2 className="text-lg font-bold text-primary">Painel Admin</h2>
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">L</span>
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-primary">Libra Admin</h2>
+                <p className="text-xs text-muted-foreground">Painel de Controle</p>
+              </div>
+            </div>
+          )}
+          {state === 'collapsed' && (
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mx-auto">
+              <span className="text-white font-bold text-sm">L</span>
+            </div>
           )}
         </div>
         
         <SidebarGroup>
-          <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2">
+            Menu Principal
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1 px-3">
               {adminMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
                       end={item.url === '/admin'}
-                      className={`flex items-center space-x-3 px-3 py-2 rounded-md transition-colors ${
-                        isActive(item.url)
-                          ? 'bg-primary text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
+                      className={({ isActive }) =>
+                        `flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 group ${
+                          isActive
+                            ? 'bg-primary text-white shadow-md'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                        }`
+                      }
                     >
-                      <item.icon className="h-5 w-5" />
-                      {state === 'expanded' && <span>{item.title}</span>}
+                      <item.icon className={`h-5 w-5 ${isActive(item.url) ? 'text-white' : 'text-sidebar-foreground group-hover:text-sidebar-accent-foreground'}`} />
+                      {state === 'expanded' && (
+                        <span className="font-medium">{item.title}</span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -79,14 +98,18 @@ const AdminSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <div className="mt-auto p-4">
+        <div className="mt-auto p-4 border-t border-sidebar-border">
           <Button
             onClick={signOut}
-            variant="outline"
-            className={`${state === 'collapsed' ? 'w-10 h-10 p-0' : 'w-full'} text-red-600 border-red-200 hover:bg-red-50`}
+            variant="ghost"
+            className={`${
+              state === 'collapsed' 
+                ? 'w-10 h-10 p-0' 
+                : 'w-full justify-start'
+            } text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200`}
           >
             <LogOut className="h-4 w-4" />
-            {state === 'expanded' && <span className="ml-2">Sair</span>}
+            {state === 'expanded' && <span className="ml-3 font-medium">Sair</span>}
           </Button>
         </div>
       </SidebarContent>

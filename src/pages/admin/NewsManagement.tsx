@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -255,282 +254,326 @@ const NewsManagement = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-primary rounded-lg">
-            <Newspaper className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Gestão de Notícias</h1>
-            <p className="text-gray-600">Gerencie as notícias do sistema</p>
-          </div>
-        </div>
-        
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()} className="flex items-center space-x-2">
-              <Plus className="h-4 w-4" />
-              <span>Nova Notícia</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-2xl">
-                {editingNews ? 'Editar Notícia' : 'Nova Notícia'}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Título *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Digite o título da notícia"
-                    required
-                  />
+    <div className="min-h-screen bg-background">
+      <div className="libra-header bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="libra-page-header">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center libra-button">
+                  <Newspaper className="h-6 w-6 text-white" />
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="category">Categoria *</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="image_url">URL da Imagem de Capa *</Label>
-                  <Input
-                    id="image_url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    placeholder="https://exemplo.com/imagem.jpg"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status *</Label>
-                  <Select value={formData.status} onValueChange={(value: 'active' | 'inactive') => setFormData({ ...formData, status: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Ativa</SelectItem>
-                      <SelectItem value="inactive">Inativa</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div>
+                  <h1 className="libra-page-title">Gestão de Notícias</h1>
+                  <p className="libra-page-description">Gerencie as notícias e comunicados do sistema</p>
                 </div>
               </div>
+            </div>
+            
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  onClick={() => handleOpenDialog()} 
+                  className="libra-button flex items-center space-x-2 px-6 py-3"
+                >
+                  <Plus className="h-5 w-5" />
+                  <span>Nova Notícia</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto libra-card">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold text-foreground">
+                    {editingNews ? 'Editar Notícia' : 'Nova Notícia'}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="title" className="text-sm font-medium text-foreground">Título *</Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        placeholder="Digite o título da notícia"
+                        className="libra-card border-border"
+                        required
+                      />
+                    </div>
 
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="is_urgent"
-                  checked={formData.is_urgent}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_urgent: checked })}
-                />
-                <Label htmlFor="is_urgent" className="flex items-center space-x-2">
-                  <AlertTriangle className="h-4 w-4 text-orange-500" />
-                  <span>Marcar como urgente</span>
-                </Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="category" className="text-sm font-medium text-foreground">Categoria *</Label>
+                      <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                        <SelectTrigger className="libra-card border-border">
+                          <SelectValue placeholder="Selecione uma categoria" />
+                        </SelectTrigger>
+                        <SelectContent className="libra-card border-border">
+                          {categories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="image_url" className="text-sm font-medium text-foreground">URL da Imagem de Capa *</Label>
+                      <Input
+                        id="image_url"
+                        value={formData.image_url}
+                        onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                        placeholder="https://exemplo.com/imagem.jpg"
+                        className="libra-card border-border"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="status" className="text-sm font-medium text-foreground">Status *</Label>
+                      <Select value={formData.status} onValueChange={(value: 'active' | 'inactive') => setFormData({ ...formData, status: value })}>
+                        <SelectTrigger className="libra-card border-border">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="libra-card border-border">
+                          <SelectItem value="active">Ativa</SelectItem>
+                          <SelectItem value="inactive">Inativa</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                    <Switch
+                      id="is_urgent"
+                      checked={formData.is_urgent}
+                      onCheckedChange={(checked) => setFormData({ ...formData, is_urgent: checked })}
+                    />
+                    <Label htmlFor="is_urgent" className="flex items-center space-x-2 text-amber-800">
+                      <AlertTriangle className="h-5 w-5" />
+                      <span className="font-medium">Marcar como urgente</span>
+                    </Label>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="content" className="text-sm font-medium text-foreground">Conteúdo *</Label>
+                    <Textarea
+                      id="content"
+                      value={formData.content}
+                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                      placeholder="Digite o conteúdo da notícia"
+                      rows={12}
+                      className="libra-card border-border"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-6 border-t border-border">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsDialogOpen(false)}
+                      className="libra-button-secondary"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button type="submit" className="libra-button">
+                      {editingNews ? 'Atualizar' : 'Criar'}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8 libra-section">
+        {/* Filtros */}
+        <Card className="libra-filter-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-foreground">
+              <Filter className="h-5 w-5 text-primary" />
+              Filtros de Busca
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">Categoria</Label>
+                <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value })}>
+                  <SelectTrigger className="libra-card border-border">
+                    <SelectValue placeholder="Todas as categorias" />
+                  </SelectTrigger>
+                  <SelectContent className="libra-card border-border">
+                    <SelectItem value="all">Todas as categorias</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="content">Conteúdo *</Label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Digite o conteúdo da notícia"
-                  rows={12}
-                  required
+                <Label className="text-sm font-medium text-foreground">Status</Label>
+                <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
+                  <SelectTrigger className="libra-card border-border">
+                    <SelectValue placeholder="Todos os status" />
+                  </SelectTrigger>
+                  <SelectContent className="libra-card border-border">
+                    <SelectItem value="all">Todos os status</SelectItem>
+                    <SelectItem value="active">Ativa</SelectItem>
+                    <SelectItem value="inactive">Inativa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="urgency"
+                  checked={filters.urgency}
+                  onCheckedChange={(checked) => setFilters({ ...filters, urgency: checked as boolean })}
                 />
+                <Label htmlFor="urgency" className="text-sm font-medium text-foreground">Apenas urgentes</Label>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  {editingNews ? 'Atualizar' : 'Criar'}
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={clearFilters} 
+                  className="libra-button-secondary flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Limpar filtros
                 </Button>
               </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Filtros */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filtros
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div className="space-y-2">
-              <Label>Categoria</Label>
-              <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Todas as categorias" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as categorias</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="space-y-2">
-              <Label>Status</Label>
-              <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos os status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os status</SelectItem>
-                  <SelectItem value="active">Ativa</SelectItem>
-                  <SelectItem value="inactive">Inativa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="urgency"
-                checked={filters.urgency}
-                onCheckedChange={(checked) => setFilters({ ...filters, urgency: checked as boolean })}
-              />
-              <Label htmlFor="urgency">Apenas urgentes</Label>
-            </div>
-
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={clearFilters} className="flex items-center gap-2">
-                <X className="h-4 w-4" />
-                Limpar filtros
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Notícias Cadastradas ({filteredNews.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Imagem</TableHead>
-                <TableHead>Título</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Urgência</TableHead>
-                <TableHead>Criado em</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredNews.map((item) => (
-                <TableRow key={item.id} className={item.is_urgent ? 'bg-red-50 border-l-4 border-red-500' : ''}>
-                  <TableCell>
-                    <img 
-                      src={item.image_url} 
-                      alt={item.title}
-                      className="w-16 h-12 object-cover rounded"
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center space-x-2">
-                      {item.is_urgent && (
-                        <div className="flex items-center space-x-1 text-red-600">
-                          <AlertTriangle className="h-4 w-4" />
-                          <span className="text-xs font-bold">🚨</span>
+        <Card className="libra-data-card">
+          <CardHeader>
+            <CardTitle className="text-foreground">
+              Notícias Cadastradas ({filteredNews.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="libra-table">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-border">
+                    <TableHead className="font-semibold text-foreground">Imagem</TableHead>
+                    <TableHead className="font-semibold text-foreground">Título</TableHead>
+                    <TableHead className="font-semibold text-foreground">Categoria</TableHead>
+                    <TableHead className="font-semibold text-foreground">Status</TableHead>
+                    <TableHead className="font-semibold text-foreground">Urgência</TableHead>
+                    <TableHead className="font-semibold text-foreground">Criado em</TableHead>
+                    <TableHead className="font-semibold text-foreground">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredNews.map((item) => (
+                    <TableRow 
+                      key={item.id} 
+                      className={`libra-table-row border-b border-border ${
+                        item.is_urgent ? 'libra-urgent' : ''
+                      }`}
+                    >
+                      <TableCell>
+                        <img 
+                          src={item.image_url} 
+                          alt={item.title}
+                          className="w-16 h-12 object-cover rounded-lg shadow-sm"
+                        />
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center space-x-2">
+                          {item.is_urgent && (
+                            <div className="flex items-center space-x-1 text-red-600">
+                              <AlertTriangle className="h-4 w-4" />
+                              <span className="text-xs font-bold">🚨</span>
+                            </div>
+                          )}
+                          <span className="text-foreground">{item.title}</span>
                         </div>
-                      )}
-                      <span>{item.title}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{item.category}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={item.status === 'active' ? 'default' : 'secondary'}>
-                      {item.status === 'active' ? 'Ativa' : 'Inativa'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {item.is_urgent && (
-                      <Badge variant="destructive" className="flex items-center space-x-1 bg-red-600">
-                        <AlertTriangle className="h-3 w-3" />
-                        <span>🚨 Urgente</span>
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>{formatDate(item.created_at)}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleOpenDialog(item)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => toggleStatus(item.id)}
-                      >
-                        {item.status === 'active' ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Trash2 className="h-4 w-4" />
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="libra-status-badge">
+                          {item.category}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={item.status === 'active' ? 'default' : 'secondary'}
+                          className={item.status === 'active' ? 'libra-active-badge' : 'libra-inactive-badge'}
+                        >
+                          {item.status === 'active' ? 'Ativa' : 'Inativa'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {item.is_urgent && (
+                          <Badge variant="destructive" className="libra-urgent-badge">
+                            <AlertTriangle className="h-3 w-3" />
+                            <span className="ml-1">🚨 Urgente</span>
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {formatDate(item.created_at)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenDialog(item)}
+                            className="libra-button-icon"
+                          >
+                            <Edit className="h-4 w-4" />
                           </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Tem certeza que deseja excluir esta notícia? Esta ação não pode ser desfeita.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(item.id)}>
-                              Excluir
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleStatus(item.id)}
+                            className="libra-button-icon"
+                          >
+                            {item.status === 'active' ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="libra-button-icon text-red-600 hover:text-red-700 hover:bg-red-50">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="libra-card">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
+                                <AlertDialogDescription className="text-muted-foreground">
+                                  Tem certeza que deseja excluir esta notícia? Esta ação não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="libra-button-secondary">Cancelar</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleDelete(item.id)}
+                                  className="bg-red-600 hover:bg-red-700 text-white"
+                                >
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

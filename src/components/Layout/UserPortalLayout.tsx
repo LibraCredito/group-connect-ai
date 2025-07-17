@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import Header from './Header';
+import PortalHeader from './PortalHeader';
 import PowerBI from '@/pages/portal/PowerBI';
 import FormProposal from '@/pages/portal/FormProposal';
 import Simulator from '@/pages/portal/Simulator';
@@ -39,7 +39,7 @@ const UserPortalLayout = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <PortalHeader />
       
       <div className="container mx-auto px-4 py-6">
         <Tabs defaultValue="powerbi" className="w-full">

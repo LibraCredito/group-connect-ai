@@ -104,8 +104,8 @@ const MaterialsManagement = () => {
 
   // Estados dos filtros
   const [filters, setFilters] = useState({
-    category: '',
-    hasPdf: '', // 'all', 'with_pdf', 'without_pdf'
+    category: 'all',
+    hasPdf: 'all', // 'all', 'with_pdf', 'without_pdf'
   });
 
   const categories = [
@@ -120,7 +120,7 @@ const MaterialsManagement = () => {
   ];
 
   const pdfOptions = [
-    { value: '', label: 'Todos' },
+    { value: 'all', label: 'Todos' },
     { value: 'with_pdf', label: 'Com PDF' },
     { value: 'without_pdf', label: 'Sem PDF' }
   ];
@@ -128,7 +128,7 @@ const MaterialsManagement = () => {
   // Filtrar materiais com base nos filtros aplicados
   const filteredMaterials = useMemo(() => {
     return materials.filter(item => {
-      const matchesCategory = !filters.category || item.category === filters.category;
+      const matchesCategory = filters.category === 'all' || item.category === filters.category;
       
       let matchesPdf = true;
       if (filters.hasPdf === 'with_pdf') {
@@ -229,8 +229,8 @@ const MaterialsManagement = () => {
 
   const clearFilters = () => {
     setFilters({
-      category: '',
-      hasPdf: '',
+      category: 'all',
+      hasPdf: 'all',
     });
   };
 
@@ -366,7 +366,7 @@ const MaterialsManagement = () => {
                   <SelectValue placeholder="Todas as categorias" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as categorias</SelectItem>
+                  <SelectItem value="all">Todas as categorias</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}

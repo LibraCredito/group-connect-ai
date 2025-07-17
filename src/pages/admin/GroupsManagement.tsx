@@ -91,11 +91,14 @@ const GroupsManagement = () => {
       return;
     }
     
+    // Convert "none" back to empty string for storage
+    const coordinatorId = formData.coordinator_id === 'none' ? '' : formData.coordinator_id;
+    
     if (editingGroup) {
       // Atualizar grupo existente
       setGroups(groups.map(group => 
         group.id === editingGroup.id 
-          ? { ...group, ...formData, updated_at: new Date().toISOString() }
+          ? { ...group, ...formData, coordinator_id: coordinatorId, updated_at: new Date().toISOString() }
           : group
       ));
       toast({
@@ -107,6 +110,7 @@ const GroupsManagement = () => {
       const newGroup: Group = {
         id: Date.now().toString(),
         ...formData,
+        coordinator_id: coordinatorId,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -177,12 +181,12 @@ const GroupsManagement = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="coordinator">Coordenador</Label>
-                <Select value={formData.coordinator_id} onValueChange={(value) => setFormData({ ...formData, coordinator_id: value })}>
+                <Select value={formData.coordinator_id || 'none'} onValueChange={(value) => setFormData({ ...formData, coordinator_id: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um coordenador" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sem coordenador</SelectItem>
+                    <SelectItem value="none">Sem coordenador</SelectItem>
                     {availableCoordinators.map((coordinator) => (
                       <SelectItem key={coordinator.id} value={coordinator.id}>
                         {coordinator.name}

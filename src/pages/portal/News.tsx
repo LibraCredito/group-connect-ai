@@ -1,14 +1,15 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, User, Newspaper, ArrowLeft, Eye } from 'lucide-react';
+import { Calendar, User, Newspaper, ArrowLeft, Eye, AlertTriangle } from 'lucide-react';
 import { News as NewsType } from '@/types/auth';
 
 const News = () => {
   const [selectedNews, setSelectedNews] = useState<NewsType | null>(null);
 
-  // Dados simulados de notícias
+  // Dados simulados de notícias ativas
   const newsData: NewsType[] = [
     {
       id: '1',
@@ -19,6 +20,8 @@ const News = () => {
       created_by: 'admin',
       created_at: '2024-01-15T10:00:00Z',
       updated_at: '2024-01-15T10:00:00Z',
+      category: 'Sistema',
+      is_urgent: false,
     },
     {
       id: '2',
@@ -29,6 +32,8 @@ const News = () => {
       created_by: 'admin',
       created_at: '2024-01-12T14:30:00Z',
       updated_at: '2024-01-12T14:30:00Z',
+      category: 'Sistema',
+      is_urgent: true,
     },
     {
       id: '3',
@@ -39,16 +44,8 @@ const News = () => {
       created_by: 'admin',
       created_at: '2024-01-10T09:15:00Z',
       updated_at: '2024-01-10T09:15:00Z',
-    },
-    {
-      id: '4',
-      title: 'Atualização de Segurança Implementada',
-      content: 'Foi implementada uma nova atualização de segurança que fortalece a proteção dos dados dos usuários. Todas as senhas foram criptografadas com algoritmos mais robustos e implementamos autenticação em duas etapas.\n\nMelhorias implementadas:\n• Criptografia avançada de senhas\n• Sistema de autenticação em duas etapas\n• Monitoramento de acessos suspeitos\n• Backup automático de dados\n• Conformidade com LGPD\n\nNenhuma ação é necessária por parte dos usuários. O sistema funcionará normalmente.',
-      image_url: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=800&h=400',
-      published_at: '2024-01-08T16:45:00Z',
-      created_by: 'admin',
-      created_at: '2024-01-08T16:45:00Z',
-      updated_at: '2024-01-08T16:45:00Z',
+      category: 'Treinamento',
+      is_urgent: false,
     },
   ];
 
@@ -102,6 +99,15 @@ const News = () => {
 
         <Card className="border-0 shadow-lg">
           <CardHeader>
+            <div className="flex items-center space-x-2 mb-2">
+              <Badge variant="secondary">{selectedNews.category}</Badge>
+              {selectedNews.is_urgent && (
+                <Badge variant="destructive" className="flex items-center space-x-1">
+                  <AlertTriangle className="h-3 w-3" />
+                  <span>🚨 Urgente</span>
+                </Badge>
+              )}
+            </div>
             <CardTitle className="text-2xl text-gray-900">
               {selectedNews.title}
             </CardTitle>
@@ -158,6 +164,15 @@ const News = () => {
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Badge variant="secondary">{news.category}</Badge>
+                    {news.is_urgent && (
+                      <Badge variant="destructive" className="flex items-center space-x-1">
+                        <AlertTriangle className="h-3 w-3" />
+                        <span>🚨 Urgente</span>
+                      </Badge>
+                    )}
+                  </div>
                   <CardTitle className="text-xl text-gray-900 mb-2">
                     {news.title}
                   </CardTitle>

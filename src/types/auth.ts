@@ -2,8 +2,8 @@
 export interface User {
   id: string;
   email: string;
-  role: 'admin' | 'coordinator' | 'user';
   name: string;
+  role: 'admin' | 'coordinator' | 'user';
   group_id?: string;
   created_at: string;
   updated_at: string;
@@ -28,24 +28,13 @@ export interface News {
   created_by: string;
   created_at: string;
   updated_at: string;
-}
-
-export interface Material {
-  id: string;
-  title: string;
-  description: string;
-  file_url?: string;
-  external_link?: string;
-  type: 'pdf' | 'video' | 'link';
-  created_by: string;
-  created_at: string;
-  updated_at: string;
+  category?: string;
+  is_urgent?: boolean;
 }
 
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  refreshUser: () => Promise<void>;
+  signOut: () => void;
 }

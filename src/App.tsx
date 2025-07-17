@@ -13,10 +13,13 @@ import Header from "@/components/Layout/Header";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import GroupsManagement from "@/pages/admin/GroupsManagement";
 import UsersManagement from "@/pages/admin/UsersManagement";
+import NewsManagement from "@/pages/admin/NewsManagement";
+import MaterialsManagement from "@/pages/admin/MaterialsManagement";
 import PowerBI from "@/pages/portal/PowerBI";
 import FormProposal from "@/pages/portal/FormProposal";
 import Simulator from "@/pages/portal/Simulator";
 import News from "@/pages/portal/News";
+import Materials from "@/pages/portal/Materials";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -71,8 +74,8 @@ const AppRoutes = () => {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/groups" element={<GroupsManagement />} />
           <Route path="/admin/users" element={<UsersManagement />} />
-          <Route path="/admin/news" element={<div className="p-6"><h1 className="text-2xl font-bold">Gestão de Notícias - Em desenvolvimento</h1></div>} />
-          <Route path="/admin/materials" element={<div className="p-6"><h1 className="text-2xl font-bold">Gestão de Materiais - Em desenvolvimento</h1></div>} />
+          <Route path="/admin/news" element={<NewsManagement />} />
+          <Route path="/admin/materials" element={<MaterialsManagement />} />
           <Route path="/" element={<Navigate to="/admin" replace />} />
         </>
       ) : (

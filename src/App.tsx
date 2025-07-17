@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
-import LoginForm from "@/components/LoginForm";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminSidebar from "@/components/Layout/AdminSidebar";
 import UserPortalLayout from "@/components/Layout/UserPortalLayout";
 import Header from "@/components/Layout/Header";
@@ -41,62 +42,109 @@ const AdminLayoutContent = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <LoginForm />;
-  }
-
-  const isAdmin = user.role === 'admin';
-
-  if (isAdmin) {
-    return (
-      <SidebarProvider>
-        <AdminLayoutContent>
-          {children}
-        </AdminLayoutContent>
-      </SidebarProvider>
-    );
-  }
-
-  return <UserPortalLayout />;
-};
-
 const AppRoutes = () => {
   const { user } = useAuth();
 
   if (!user) {
-    return <LoginForm />;
+    return null; // ProtectedRoute irá mostrar o formulário de login
   }
 
   return (
     <Routes>
       {user.role === 'admin' ? (
         <>
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/groups" element={<GroupsManagement />} />
-          <Route path="/admin/users" element={<UsersManagement />} />
-          <Route path="/admin/news" element={<NewsManagement />} />
-          <Route path="/admin/materials" element={<MaterialsManagement />} />
+          <Route path="/admin" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/groups" element={
+            <ProtectedRoute requiredRole="admin">
+              <GroupsManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/users" element={
+            <ProtectedRoute requiredRole="admin">
+              <UsersManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/news" element={
+            <ProtectedRoute requiredRole="admin">
+              <NewsManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/materials" element={
+            <ProtectedRoute requiredRole="admin">
+              <MaterialsManagement />
+            </ProtectedRoute>
+          } />
           <Route path="/" element={<Navigate to="/admin" replace />} />
         </>
       ) : (
         <>
           <Route path="/" element={<Navigate to="/portal" replace />} />
-          <Route path="/portal/*" element={<div />} />
+          <Route path="/portal/powerbi" element={
+            <ProtectedRoute>
+              <PowerBI />
+            </ProtectedRoute>
+          } />
+          <Route path="/portal/form" element={
+            <ProtectedRoute>
+              <FormProposal />
+            </ProtectedRoute>
+          } />
+          <Route path="/portal/simulator" element={
+            <ProtectedRoute>
+              <Simulator />
+            </ProtectedRoute>
+          } />
+          <Route path="/portal/news" element={
+            <ProtectedRoute>
+              <News />
+            </ProtectedRoute>
+          } />
+          <Route path="/portal/materials" element={
+            <ProtectedRoute>
+              <Materials />
+            </ProtectedRoute>
+          } />
+          <Route path="/portal" element={
+            <ProtectedRoute>
+              <News />
+            </ProtectedRoute>
+          } />
         </>
       )}
       <Route path="*" element={<NotFound />} />
     </Routes>
+  );
+};
+
+const AppContent = () => {
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <ProtectedRoute>
+        <div />
+      </ProtectedRoute>
+    );
+  }
+
+  if (user.role === 'admin') {
+    return (
+      <SidebarProvider>
+        <AdminLayoutContent>
+          <AppRoutes />
+        </AdminLayoutContent>
+      </SidebarProvider>
+    );
+  }
+
+  return (
+    <UserPortalLayout>
+      <AppRoutes />
+    </UserPortalLayout>
   );
 };
 
@@ -107,9 +155,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <ProtectedLayout>
-            <AppRoutes />
-          </ProtectedLayout>
+          <AppContent />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

@@ -23,18 +23,33 @@ export interface News {
   id: string;
   title: string;
   content: string;
+  category?: string;
   image_url?: string;
-  published_at: string;
+  is_urgent?: boolean;
+  is_active?: boolean;
   created_by: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface Material {
+  id: string;
+  title: string;
+  description?: string;
+  file_url?: string;
+  file_type?: string;
   category?: string;
-  is_urgent?: boolean;
+  is_active?: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => void;
+  updateProfile: (data: Partial<User>) => Promise<void>;
 }

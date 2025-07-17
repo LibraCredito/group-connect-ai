@@ -16,36 +16,36 @@ const News = () => {
       title: 'Nova Funcionalidade: Dashboard Avançado',
       content: 'Estamos felizes em anunciar o lançamento do nosso novo dashboard com funcionalidades avançadas de análise e relatórios em tempo real. Esta atualização inclui gráficos interativos, filtros personalizados e exportação de dados.\n\nPrincipais recursos:\n• Visualizações em tempo real\n• Filtros avançados por período e categoria\n• Exportação de dados em múltiplos formatos\n• Interface mais intuitiva e responsiva\n• Relatórios automáticos por email\n\nEsta funcionalidade está disponível para todos os usuários a partir de hoje. Para acessar, clique na aba "Power BI" no menu principal.',
       image_url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&h=400',
-      published_at: '2024-01-15T10:00:00Z',
-      created_by: 'admin',
       created_at: '2024-01-15T10:00:00Z',
       updated_at: '2024-01-15T10:00:00Z',
+      created_by: 'admin',
       category: 'Sistema',
       is_urgent: false,
+      is_active: true,
     },
     {
       id: '2',
       title: 'Manutenção Programada do Sistema',
       content: 'Informamos que será realizada uma manutenção programada no sistema no próximo domingo, das 02:00 às 06:00. Durante este período, o acesso poderá ser intermitente. Agradecemos a compreensão.\n\nDetalhes da manutenção:\n• Data: Domingo, 21 de janeiro de 2024\n• Horário: 02:00 às 06:00 (horário de Brasília)\n• Serviços afetados: Login, Dashboard, Formulários\n• Duração estimada: 4 horas\n\nApós a manutenção, o sistema funcionará com melhor performance e estabilidade.',
       image_url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&h=400',
-      published_at: '2024-01-12T14:30:00Z',
-      created_by: 'admin',
       created_at: '2024-01-12T14:30:00Z',
       updated_at: '2024-01-12T14:30:00Z',
+      created_by: 'admin',
       category: 'Sistema',
       is_urgent: true,
+      is_active: true,
     },
     {
       id: '3',
       title: 'Treinamento: Como Utilizar o Power BI',
       content: 'Será realizado um treinamento online sobre como utilizar efetivamente o Power BI para análise de propostas. O treinamento acontecerá na próxima quinta-feira, às 14:00. Inscrições abertas.\n\nPrograma do treinamento:\n• Introdução ao Power BI\n• Navegação pela interface\n• Criação de filtros personalizados\n• Interpretação de gráficos e métricas\n• Exportação de relatórios\n• Sessão de perguntas e respostas\n\nPara se inscrever, entre em contato com o administrador do sistema.',
       image_url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&h=400',
-      published_at: '2024-01-10T09:15:00Z',
-      created_by: 'admin',
       created_at: '2024-01-10T09:15:00Z',
       updated_at: '2024-01-10T09:15:00Z',
+      created_by: 'admin',
       category: 'Treinamento',
       is_urgent: false,
+      is_active: true,
     },
   ];
 
@@ -114,14 +114,14 @@ const News = () => {
             <div className="flex items-center space-x-4 text-sm text-gray-500">
               <div className="flex items-center space-x-1">
                 <Calendar className="h-4 w-4" />
-                <span>{formatDate(selectedNews.published_at)}</span>
+                <span>{formatDate(selectedNews.created_at)}</span>
               </div>
               <div className="flex items-center space-x-1">
                 <User className="h-4 w-4" />
                 <span>Administrador</span>
               </div>
               <Badge variant="secondary" className="text-xs">
-                {getTimeAgo(selectedNews.published_at)}
+                {getTimeAgo(selectedNews.created_at)}
               </Badge>
             </div>
           </CardHeader>
@@ -179,14 +179,14 @@ const News = () => {
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
                     <div className="flex items-center space-x-1">
                       <Calendar className="h-4 w-4" />
-                      <span>{formatDate(news.published_at)}</span>
+                      <span>{formatDate(news.created_at)}</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <User className="h-4 w-4" />
                       <span>Administrador</span>
                     </div>
                     <Badge variant="secondary" className="text-xs">
-                      {getTimeAgo(news.published_at)}
+                      {getTimeAgo(news.created_at)}
                     </Badge>
                   </div>
                 </div>

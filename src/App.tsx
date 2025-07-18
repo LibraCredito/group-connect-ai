@@ -37,7 +37,7 @@ function App() {
             </PublicLayout>
           } />
           
-          {/* Admin Routes */}
+          {/* Admin Routes - Só admin pode acessar */}
           <Route path="/admin/*" element={
             <ProtectedRoute requiredRole="admin">
               <SidebarProvider>
@@ -60,7 +60,7 @@ function App() {
             </ProtectedRoute>
           } />
 
-          {/* Portal Routes */}
+          {/* Portal Routes - Usuários comuns e coordenadores podem acessar */}
           <Route path="/portal/*" element={
             <ProtectedRoute>
               <UserPortalLayout />

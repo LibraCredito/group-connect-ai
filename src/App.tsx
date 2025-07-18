@@ -18,8 +18,8 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <Routes>
           <Route path="/" element={
             <PublicLayout>
@@ -69,8 +69,8 @@ function App() {
 
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

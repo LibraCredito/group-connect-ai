@@ -27,83 +27,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      console.log('Buscando perfil do usuário:', userId);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Erro ao buscar perfil:', error);
-        return null;
-      }
-      
-      console.log('Perfil encontrado:', data);
-      return data;
-    } catch (error) {
-      console.error('Erro ao buscar perfil do usuário:', error);
-      return null;
-    }
-  };
-
-  const handleUserAuthenticated = async (authUser: any) => {
-    try {
-      console.log('Processando autenticação do usuário:', authUser.id);
-      
-      const profile = await fetchUserProfile(authUser.id);
-      if (!profile) {
-        console.error('Perfil não encontrado para o usuário');
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-
-      // Garantir que o role é válido
-      const validRoles = ['admin', 'coordinator', 'user'] as const;
-      const userRole = validRoles.includes(profile.role as any) ? profile.role as 'admin' | 'coordinator' | 'user' : 'user';
-      
-      const userData = {
-        id: profile.id,
-        email: authUser.email!,
-        name: profile.name,
-        role: userRole,
-        group_id: profile.group_id,
-        created_at: profile.created_at,
-        updated_at: profile.updated_at,
-      };
-
-      console.log('Dados do usuário processados:', userData);
-      setUser(userData);
-
-      // Redirecionamento automático baseado na role
-      console.log('Iniciando redirecionamento baseado na role:', userRole);
-      
-      // Usar setTimeout para evitar problemas de timing
-      setTimeout(() => {
-        try {
-          if (userRole === 'admin') {
-            console.log('Redirecionando admin para /admin');
-            navigate('/admin', { replace: true });
-          } else {
-            console.log('Redirecionando usuário/coordenador para /portal');
-            navigate('/portal', { replace: true });
-          }
-        } catch (navError) {
-          console.error('Erro no redirecionamento:', navError);
-        }
-      }, 100);
-      
-    } catch (error) {
-      console.error('Erro ao processar autenticação:', error);
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const signIn = async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -206,44 +129,93 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    const getSession = async () => {
+    const initializeAuth = async () => {
       try {
-        console.log('Verificando sessão existente...');
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (mounted) {
-          if (session?.user) {
-            console.log('Sessão encontrada, processando usuário...');
-            await handleUserAuthenticated(session.user);
-          } else {
-            console.log('Nenhuma sessão encontrada');
-            setUser(null);
-            setLoading(false);
+        if (mounted && session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profile) {
+            const validRoles = ['admin', 'coordinator', 'user'] as const;
+            const userRole = validRoles.includes(profile.role as any) ? profile.role as 'admin' | 'coordinator' | 'user' : 'user';
+            
+            const userData = {
+              id: profile.id,
+              email: session.user.email!,
+              name: profile.name,
+              role: userRole,
+              group_id: profile.group_id,
+              created_at: profile.created_at,
+              updated_at: profile.updated_at,
+            };
+
+            setUser(userData);
+
+            // Redirecionamento simples e direto
+            if (userRole === 'admin') {
+              navigate('/admin', { replace: true });
+            } else {
+              navigate('/portal', { replace: true });
+            }
           }
         }
       } catch (error) {
-        console.error('Erro ao buscar sessão:', error);
+        console.error('Erro na inicialização:', error);
+      } finally {
         if (mounted) {
-          setUser(null);
           setLoading(false);
         }
       }
     };
 
+    // Configurar listener de mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Mudança no estado de autenticação:', event, session?.user?.id);
-      
-      if (mounted) {
-        if (session?.user) {
-          await handleUserAuthenticated(session.user);
-        } else {
-          setUser(null);
-          setLoading(false);
+      if (!mounted) return;
+
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      if (event === 'SIGNED_IN' && session?.user) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profile) {
+            const validRoles = ['admin', 'coordinator', 'user'] as const;
+            const userRole = validRoles.includes(profile.role as any) ? profile.role as 'admin' | 'coordinator' | 'user' : 'user';
+            
+            const userData = {
+              id: profile.id,
+              email: session.user.email!,
+              name: profile.name,
+              role: userRole,
+              group_id: profile.group_id,
+              created_at: profile.created_at,
+              updated_at: profile.updated_at,
+            };
+
+            setUser(userData);
+          }
+        } catch (error) {
+          console.error('Erro ao buscar perfil:', error);
         }
       }
+      
+      setLoading(false);
     });
 
-    getSession();
+    initializeAuth();
 
     return () => {
       mounted = false;

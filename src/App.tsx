@@ -15,7 +15,6 @@ import PowerBI from './pages/portal/PowerBI';
 import FormProposal from './pages/portal/FormProposal';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import PublicLayout from './components/Layout/PublicLayout';
 import UserPortalLayout from './components/Layout/UserPortalLayout';
 import AdminSidebar from './components/Layout/AdminSidebar';
 import Header from './components/Layout/Header';
@@ -26,8 +25,9 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<PublicLayout><Index /></PublicLayout>} />
-          <Route path="/register" element={<PublicLayout><Index /></PublicLayout>} />
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Index />} />
+          <Route path="/register" element={<Index />} />
           
           {/* Admin Routes */}
           <Route path="/admin/*" element={

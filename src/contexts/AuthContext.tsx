@@ -24,6 +24,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   const fetchUserProfile = async (userId: string) => {
     try {
@@ -47,7 +48,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      setLoading(true);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -66,14 +66,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         variant: 'destructive',
       });
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string, name: string) => {
     try {
-      setLoading(true);
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -97,8 +94,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         variant: 'destructive',
       });
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -152,72 +147,53 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
 
-    const initializeAuth = async () => {
+    const handleAuthStateChange = async (event: any, session: any) => {
+      if (!isMounted) return;
+      
+      console.log('Auth state changed:', event, session?.user?.id);
+      
+      if (session?.user) {
+        const profile = await fetchUserProfile(session.user.id);
+        if (profile && isMounted) {
+          const validRoles = ['admin', 'coordinator', 'user'] as const;
+          const role = validRoles.includes(profile.role as any) ? profile.role as 'admin' | 'coordinator' | 'user' : 'user';
+          
+          setUser({
+            id: profile.id,
+            email: session.user.email!,
+            name: profile.name,
+            role: role,
+            group_id: profile.group_id,
+            created_at: profile.created_at,
+            updated_at: profile.updated_at,
+          });
+        }
+      } else {
+        setUser(null);
+      }
+      
+      if (!initialized && isMounted) {
+        setInitialized(true);
+        setLoading(false);
+      }
+    };
+
+    const initAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user && isMounted) {
-          const profile = await fetchUserProfile(session.user.id);
-          if (profile && isMounted) {
-            // Validar se o role é um dos valores permitidos
-            const validRoles = ['admin', 'coordinator', 'user'] as const;
-            const role = validRoles.includes(profile.role as any) ? profile.role as 'admin' | 'coordinator' | 'user' : 'user';
-            
-            setUser({
-              id: profile.id,
-              email: session.user.email!,
-              name: profile.name,
-              role: role,
-              group_id: profile.group_id,
-              created_at: profile.created_at,
-              updated_at: profile.updated_at,
-            });
-          }
-        }
+        await handleAuthStateChange('INITIAL_SESSION', session);
       } catch (error) {
-        console.error('Erro ao inicializar autenticação:', error);
-      } finally {
+        console.error('Error initializing auth:', error);
         if (isMounted) {
+          setInitialized(true);
           setLoading(false);
         }
       }
     };
 
-    // Configurar listener de mudanças de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!isMounted) return;
-
-        console.log('Auth state changed:', event);
-        
-        if (session?.user) {
-          const profile = await fetchUserProfile(session.user.id);
-          if (profile && isMounted) {
-            // Validar se o role é um dos valores permitidos
-            const validRoles = ['admin', 'coordinator', 'user'] as const;
-            const role = validRoles.includes(profile.role as any) ? profile.role as 'admin' | 'coordinator' | 'user' : 'user';
-            
-            setUser({
-              id: profile.id,
-              email: session.user.email!,
-              name: profile.name,
-              role: role,
-              group_id: profile.group_id,
-              created_at: profile.created_at,
-              updated_at: profile.updated_at,
-            });
-          }
-        } else {
-          setUser(null);
-        }
-        
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    );
-
-    initializeAuth();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
+    
+    initAuth();
 
     return () => {
       isMounted = false;

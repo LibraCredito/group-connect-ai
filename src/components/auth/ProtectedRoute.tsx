@@ -11,7 +11,7 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
 
-  console.log('ProtectedRoute - user:', user, 'loading:', loading);
+  console.log('ProtectedRoute - user:', user?.id, 'loading:', loading, 'role:', user?.role);
 
   if (loading) {
     return (

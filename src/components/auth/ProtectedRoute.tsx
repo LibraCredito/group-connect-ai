@@ -29,22 +29,18 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   }
 
   // Verificar se o usuário tem o role necessário
-  if (requiredRole) {
-    const hasRequiredRole = user.role === requiredRole || user.role === 'admin';
-    
-    if (!hasRequiredRole) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600 mb-2">Acesso Negado</h1>
-            <p className="text-gray-600">Você não tem permissão para acessar esta página.</p>
-            <p className="text-sm text-gray-500 mt-2">
-              Role necessário: {requiredRole}, seu role: {user.role}
-            </p>
-          </div>
+  if (requiredRole && requiredRole === 'admin' && user.role !== 'admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-2">Acesso Negado</h1>
+          <p className="text-gray-600">Você não tem permissão para acessar esta página.</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Role necessário: {requiredRole}, seu role: {user.role}
+          </p>
         </div>
-      );
-    }
+      </div>
+    );
   }
 
   return <>{children}</>;

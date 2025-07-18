@@ -8,11 +8,6 @@ import UsersManagement from './pages/admin/UsersManagement';
 import GroupsManagement from './pages/admin/GroupsManagement';
 import NewsManagement from './pages/admin/NewsManagement';
 import MaterialsManagement from './pages/admin/MaterialsManagement';
-import News from './pages/portal/News';
-import Materials from './pages/portal/Materials';
-import Simulator from './pages/portal/Simulator';
-import PowerBI from './pages/portal/PowerBI';
-import FormProposal from './pages/portal/FormProposal';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import UserPortalLayout from './components/Layout/UserPortalLayout';
@@ -68,15 +63,7 @@ function App() {
           {/* Portal Routes */}
           <Route path="/portal/*" element={
             <ProtectedRoute>
-              <UserPortalLayout>
-                <Routes>
-                  <Route path="/" element={<News />} />
-                  <Route path="/materials" element={<Materials />} />
-                  <Route path="/simulator" element={<Simulator />} />
-                  <Route path="/powerbi" element={<PowerBI />} />
-                  <Route path="/form" element={<FormProposal />} />
-                </Routes>
-              </UserPortalLayout>
+              <UserPortalLayout />
             </ProtectedRoute>
           } />
 

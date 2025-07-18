@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       toast({
         title: 'Conta criada com sucesso!',
-        description: 'Verifique seu email para confirmar a conta.',
+        description: 'Verificação de email pode ser necessária. Aguarde alguns instantes.',
       });
     } catch (error: any) {
       toast({
@@ -159,16 +159,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    let mounted = true;
+
     // Configurar listener de mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+
+        console.log('Auth state changed:', event, session?.user?.id);
+        
         setSession(session);
         
         if (session?.user) {
           // Buscar perfil do usuário quando logado
           setTimeout(async () => {
+            if (!mounted) return;
+            
             const profile = await fetchUserProfile(session.user.id);
-            if (profile) {
+            if (profile && mounted) {
               setUser({
                 id: profile.id,
                 email: session.user.email!,
@@ -179,7 +187,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 updated_at: profile.updated_at,
               });
             }
-          }, 0);
+          }, 100);
         } else {
           setUser(null);
         }
@@ -190,10 +198,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Verificar sessão existente
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
       setSession(session);
       if (session?.user) {
         fetchUserProfile(session.user.id).then(profile => {
-          if (profile) {
+          if (profile && mounted) {
             setUser({
               id: profile.id,
               email: session.user.email!,
@@ -209,7 +219,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (

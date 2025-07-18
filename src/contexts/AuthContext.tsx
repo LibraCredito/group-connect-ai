@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, AuthContextType } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -24,6 +25,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchUserProfile = async (userId: string) => {
     try {
@@ -42,6 +44,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);
       return null;
+    }
+  };
+
+  const handleUserAuthenticated = async (authUser: any) => {
+    const profile = await fetchUserProfile(authUser.id);
+    if (profile) {
+      // Garantir que o role é válido
+      const validRoles = ['admin', 'coordinator', 'user'] as const;
+      const userRole = validRoles.includes(profile.role as any) ? profile.role as 'admin' | 'coordinator' | 'user' : 'user';
+      
+      const userData = {
+        id: profile.id,
+        email: authUser.email!,
+        name: profile.name,
+        role: userRole,
+        group_id: profile.group_id,
+        created_at: profile.created_at,
+        updated_at: profile.updated_at,
+      };
+
+      setUser(userData);
+
+      // Redirecionamento automático baseado na role
+      console.log('Redirecionando usuário baseado na role:', userRole);
+      if (userRole === 'admin') {
+        console.log('Redirecionando admin para /admin');
+        navigate('/admin', { replace: true });
+      } else {
+        console.log('Redirecionando usuário/coordenador para /portal');
+        navigate('/portal', { replace: true });
+      }
     }
   };
 
@@ -102,6 +135,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
 
       setUser(null);
+      navigate('/', { replace: true });
       
       toast({
         title: 'Logout realizado',
@@ -152,22 +186,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (mounted) {
           if (session?.user) {
-            const profile = await fetchUserProfile(session.user.id);
-            if (profile && mounted) {
-              // Garantir que o role é válido
-              const validRoles = ['admin', 'coordinator', 'user'] as const;
-              const userRole = validRoles.includes(profile.role as any) ? profile.role as 'admin' | 'coordinator' | 'user' : 'user';
-              
-              setUser({
-                id: profile.id,
-                email: session.user.email!,
-                name: profile.name,
-                role: userRole,
-                group_id: profile.group_id,
-                created_at: profile.created_at,
-                updated_at: profile.updated_at,
-              });
-            }
+            await handleUserAuthenticated(session.user);
           } else {
             setUser(null);
           }
@@ -187,22 +206,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (mounted) {
         if (session?.user) {
-          const profile = await fetchUserProfile(session.user.id);
-          if (profile && mounted) {
-            // Garantir que o role é válido
-            const validRoles = ['admin', 'coordinator', 'user'] as const;
-            const userRole = validRoles.includes(profile.role as any) ? profile.role as 'admin' | 'coordinator' | 'user' : 'user';
-            
-            setUser({
-              id: profile.id,
-              email: session.user.email!,
-              name: profile.name,
-              role: userRole,
-              group_id: profile.group_id,
-              created_at: profile.created_at,
-              updated_at: profile.updated_at,
-            });
-          }
+          await handleUserAuthenticated(session.user);
         } else {
           setUser(null);
         }
@@ -216,7 +220,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   return (
     <AuthContext.Provider value={{ 

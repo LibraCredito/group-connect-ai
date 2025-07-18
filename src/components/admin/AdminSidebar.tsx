@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
@@ -48,8 +48,6 @@ const menuItems = [
 ];
 
 export const AdminSidebar = () => {
-  const location = useLocation();
-
   return (
     <Sidebar>
       <SidebarContent>
@@ -76,7 +74,7 @@ export const AdminSidebar = () => {
                       to={item.url}
                       end={item.url === '/admin'}
                       className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                        `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors w-full ${
                           isActive
                             ? 'bg-primary text-primary-foreground'
                             : 'text-foreground hover:bg-accent hover:text-accent-foreground'

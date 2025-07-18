@@ -33,7 +33,7 @@ export const Users = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    role: 'user' as const,
+    role: 'user' as 'admin' | 'coordinator' | 'user',
     group_id: '',
   });
 
@@ -45,7 +45,14 @@ export const Users = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setUsers(data || []);
+      
+      // Type assertion to ensure compatibility
+      const typedUsers: User[] = (data || []).map(user => ({
+        ...user,
+        role: user.role as 'admin' | 'coordinator' | 'user'
+      }));
+      
+      setUsers(typedUsers);
     } catch (error: any) {
       toast({
         title: 'Erro ao carregar usuários',
@@ -261,7 +268,7 @@ export const Users = () => {
             
             <div className="space-y-2">
               <Label htmlFor="role">Tipo</Label>
-              <Select value={formData.role} onValueChange={(value: any) => setFormData({ ...formData, role: value })}>
+              <Select value={formData.role} onValueChange={(value: 'admin' | 'coordinator' | 'user') => setFormData({ ...formData, role: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

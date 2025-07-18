@@ -9,7 +9,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import UserPortalLayout from './components/Layout/UserPortalLayout';
 import PublicLayout from './components/Layout/PublicLayout';
 
-// Novos componentes administrativos
+// Componentes administrativos
 import { AdminLayout } from './components/admin/AdminLayout';
 import { Dashboard } from './pages/admin/Dashboard';
 import { Users } from './pages/admin/Users';
@@ -22,6 +22,7 @@ function App() {
     <Router>
       <AuthProvider>
         <Routes>
+          {/* Rotas públicas */}
           <Route path="/" element={
             <PublicLayout>
               <Index />
@@ -38,7 +39,7 @@ function App() {
             </PublicLayout>
           } />
           
-          {/* Rotas administrativas completamente reformuladas */}
+          {/* Rotas administrativas */}
           <Route path="/admin" element={
             <ProtectedRoute requiredRole="admin">
               <AdminLayout>
@@ -79,13 +80,14 @@ function App() {
             </ProtectedRoute>
           } />
 
-          {/* Portal Routes - mantendo intacto */}
+          {/* Portal do usuário */}
           <Route path="/portal/*" element={
             <ProtectedRoute>
               <UserPortalLayout />
             </ProtectedRoute>
           } />
 
+          {/* Página 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />

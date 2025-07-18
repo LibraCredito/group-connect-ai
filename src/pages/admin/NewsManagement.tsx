@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,9 +50,11 @@ import {
   AlertTriangle,
   Filter,
   X,
-  Newspaper
+  Newspaper,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface NewsItem {
   id: string;
@@ -61,7 +63,7 @@ interface NewsItem {
   category: string;
   image_url: string;
   is_urgent: boolean;
-  status: 'active' | 'inactive';
+  is_active: boolean;
   created_at: string;
   updated_at: string;
   created_by: string;
@@ -69,33 +71,8 @@ interface NewsItem {
 
 const NewsManagement = () => {
   const { toast } = useToast();
-  const [news, setNews] = useState<NewsItem[]>([
-    {
-      id: '1',
-      title: 'Nova Funcionalidade: Dashboard Avançado',
-      content: 'Estamos felizes em anunciar o lançamento do nosso novo dashboard com funcionalidades avançadas.',
-      category: 'Sistema',
-      image_url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&h=400',
-      is_urgent: false,
-      status: 'active',
-      created_at: '2024-01-15T10:00:00Z',
-      updated_at: '2024-01-15T10:00:00Z',
-      created_by: 'admin',
-    },
-    {
-      id: '2',
-      title: 'Manutenção Programada do Sistema',
-      content: 'Informamos que será realizada uma manutenção programada no sistema.',
-      category: 'Sistema',
-      image_url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&h=400',
-      is_urgent: true,
-      status: 'active',
-      created_at: '2024-01-12T14:30:00Z',
-      updated_at: '2024-01-12T14:30:00Z',
-      created_by: 'admin',
-    },
-  ]);
-
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
   const [formData, setFormData] = useState({
@@ -104,7 +81,7 @@ const NewsManagement = () => {
     category: '',
     image_url: '',
     is_urgent: false,
-    status: 'active' as 'active' | 'inactive',
+    is_active: true,
   });
 
   // Estados dos filtros
@@ -125,12 +102,48 @@ const NewsManagement = () => {
     'Anúncios'
   ];
 
+  const fetchNews = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('news')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar notícias:', error);
+        toast({
+          title: 'Erro',
+          description: 'Falha ao carregar as notícias.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setNews(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar notícias:', error);
+      toast({
+        title: 'Erro',
+        description: 'Falha ao carregar as notícias.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
   // Filtrar e ordenar notícias com base nos filtros aplicados
   const filteredNews = useMemo(() => {
     const filtered = news.filter(item => {
       const matchesCategory = filters.category === 'all' || item.category === filters.category;
       const matchesUrgency = !filters.urgency || item.is_urgent;
-      const matchesStatus = filters.status === 'all' || item.status === filters.status;
+      const matchesStatus = filters.status === 'all' || 
+        (filters.status === 'active' ? item.is_active : !item.is_active);
       
       return matchesCategory && matchesUrgency && matchesStatus;
     });
@@ -153,7 +166,7 @@ const NewsManagement = () => {
       category: '',
       image_url: '',
       is_urgent: false,
-      status: 'active',
+      is_active: true,
     });
     setEditingNews(null);
   };
@@ -167,7 +180,7 @@ const NewsManagement = () => {
         category: newsItem.category,
         image_url: newsItem.image_url,
         is_urgent: newsItem.is_urgent,
-        status: newsItem.status,
+        is_active: newsItem.is_active,
       });
     } else {
       resetForm();
@@ -175,7 +188,7 @@ const NewsManagement = () => {
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.title || !formData.content || !formData.category || !formData.image_url) {
@@ -187,53 +200,148 @@ const NewsManagement = () => {
       return;
     }
 
-    if (editingNews) {
-      setNews(news.map(item => 
-        item.id === editingNews.id 
-          ? { ...item, ...formData, updated_at: new Date().toISOString() }
-          : item
-      ));
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: 'Erro',
+          description: 'Usuário não autenticado.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (editingNews) {
+        const { error } = await supabase
+          .from('news')
+          .update({
+            ...formData,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', editingNews.id);
+
+        if (error) {
+          console.error('Erro ao atualizar notícia:', error);
+          toast({
+            title: 'Erro',
+            description: 'Falha ao atualizar a notícia.',
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        toast({
+          title: 'Sucesso',
+          description: 'Notícia atualizada com sucesso!',
+        });
+      } else {
+        const { error } = await supabase
+          .from('news')
+          .insert([{
+            ...formData,
+            created_by: user.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }]);
+
+        if (error) {
+          console.error('Erro ao criar notícia:', error);
+          toast({
+            title: 'Erro',
+            description: 'Falha ao criar a notícia.',
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        toast({
+          title: 'Sucesso',
+          description: 'Notícia criada com sucesso!',
+        });
+      }
+
+      setIsDialogOpen(false);
+      resetForm();
+      fetchNews();
+    } catch (error) {
+      console.error('Erro ao salvar notícia:', error);
       toast({
-        title: 'Sucesso',
-        description: 'Notícia atualizada com sucesso!',
-      });
-    } else {
-      const newNews: NewsItem = {
-        id: Date.now().toString(),
-        ...formData,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        created_by: 'admin',
-      };
-      setNews([...news, newNews]);
-      toast({
-        title: 'Sucesso',
-        description: 'Notícia criada com sucesso!',
+        title: 'Erro',
+        description: 'Falha ao salvar a notícia.',
+        variant: 'destructive',
       });
     }
-
-    setIsDialogOpen(false);
-    resetForm();
   };
 
-  const handleDelete = (id: string) => {
-    setNews(news.filter(item => item.id !== id));
-    toast({
-      title: 'Sucesso',
-      description: 'Notícia excluída com sucesso!',
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('news')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao excluir notícia:', error);
+        toast({
+          title: 'Erro',
+          description: 'Falha ao excluir a notícia.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      toast({
+        title: 'Sucesso',
+        description: 'Notícia excluída com sucesso!',
+      });
+      fetchNews();
+    } catch (error) {
+      console.error('Erro ao excluir notícia:', error);
+      toast({
+        title: 'Erro',
+        description: 'Falha ao excluir a notícia.',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const toggleStatus = (id: string) => {
-    setNews(news.map(item => 
-      item.id === id 
-        ? { ...item, status: item.status === 'active' ? 'inactive' : 'active', updated_at: new Date().toISOString() }
-        : item
-    ));
-    toast({
-      title: 'Sucesso',
-      description: 'Status da notícia alterado com sucesso!',
-    });
+  const toggleStatus = async (id: string) => {
+    try {
+      const newsItem = news.find(item => item.id === id);
+      if (!newsItem) return;
+
+      const { error } = await supabase
+        .from('news')
+        .update({
+          is_active: !newsItem.is_active,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao alterar status:', error);
+        toast({
+          title: 'Erro',
+          description: 'Falha ao alterar o status da notícia.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      toast({
+        title: 'Sucesso',
+        description: 'Status da notícia alterado com sucesso!',
+      });
+      fetchNews();
+    } catch (error) {
+      console.error('Erro ao alterar status:', error);
+      toast({
+        title: 'Erro',
+        description: 'Falha ao alterar o status da notícia.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const clearFilters = () => {
@@ -253,6 +361,17 @@ const NewsManagement = () => {
       minute: '2-digit',
     });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Carregando notícias...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -331,7 +450,7 @@ const NewsManagement = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="status" className="text-sm font-medium text-gray-700">Status *</Label>
-                      <Select value={formData.status} onValueChange={(value: 'active' | 'inactive') => setFormData({ ...formData, status: value })}>
+                      <Select value={formData.is_active ? 'active' : 'inactive'} onValueChange={(value) => setFormData({ ...formData, is_active: value === 'active' })}>
                         <SelectTrigger className="w-full">
                           <SelectValue />
                         </SelectTrigger>
@@ -459,118 +578,126 @@ const NewsManagement = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="libra-table">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-b border-border">
-                    <TableHead className="font-semibold text-foreground">Imagem</TableHead>
-                    <TableHead className="font-semibold text-foreground">Título</TableHead>
-                    <TableHead className="font-semibold text-foreground">Categoria</TableHead>
-                    <TableHead className="font-semibold text-foreground">Status</TableHead>
-                    <TableHead className="font-semibold text-foreground">Urgência</TableHead>
-                    <TableHead className="font-semibold text-foreground">Criado em</TableHead>
-                    <TableHead className="font-semibold text-foreground">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredNews.map((item) => (
-                    <TableRow 
-                      key={item.id} 
-                      className={`libra-table-row border-b border-border ${
-                        item.is_urgent ? 'libra-urgent' : ''
-                      }`}
-                    >
-                      <TableCell>
-                        <img 
-                          src={item.image_url} 
-                          alt={item.title}
-                          className="w-16 h-12 object-cover rounded-lg shadow-sm"
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center space-x-2">
-                          {item.is_urgent && (
-                            <div className="flex items-center space-x-1 text-red-600">
-                              <AlertTriangle className="h-4 w-4" />
-                              <span className="text-xs font-bold">🚨</span>
-                            </div>
-                          )}
-                          <span className="text-foreground">{item.title}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className="libra-status-badge">
-                          {item.category}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={item.status === 'active' ? 'default' : 'secondary'}
-                          className={item.status === 'active' ? 'libra-active-badge' : 'libra-inactive-badge'}
-                        >
-                          {item.status === 'active' ? 'Ativa' : 'Inativa'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {item.is_urgent && (
-                          <Badge variant="destructive" className="libra-urgent-badge">
-                            <AlertTriangle className="h-3 w-3" />
-                            <span className="ml-1">🚨 Urgente</span>
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {formatDate(item.created_at)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleOpenDialog(item)}
-                            className="libra-button-icon"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => toggleStatus(item.id)}
-                            className="libra-button-icon"
-                          >
-                            {item.status === 'active' ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="libra-button-icon text-red-600 hover:text-red-700 hover:bg-red-50">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="libra-card">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
-                                <AlertDialogDescription className="text-muted-foreground">
-                                  Tem certeza que deseja excluir esta notícia? Esta ação não pode ser desfeita.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="libra-button-secondary">Cancelar</AlertDialogCancel>
-                                <AlertDialogAction 
-                                  onClick={() => handleDelete(item.id)}
-                                  className="bg-red-600 hover:bg-red-700 text-white"
-                                >
-                                  Excluir
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </TableCell>
+            {filteredNews.length === 0 ? (
+              <div className="text-center py-8">
+                <Newspaper className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg">Nenhuma notícia encontrada</p>
+                <p className="text-gray-400 text-sm">Clique em "Nova Notícia" para criar sua primeira notícia</p>
+              </div>
+            ) : (
+              <div className="libra-table">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-border">
+                      <TableHead className="font-semibold text-foreground">Imagem</TableHead>
+                      <TableHead className="font-semibold text-foreground">Título</TableHead>
+                      <TableHead className="font-semibold text-foreground">Categoria</TableHead>
+                      <TableHead className="font-semibold text-foreground">Status</TableHead>
+                      <TableHead className="font-semibold text-foreground">Urgência</TableHead>
+                      <TableHead className="font-semibold text-foreground">Criado em</TableHead>
+                      <TableHead className="font-semibold text-foreground">Ações</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredNews.map((item) => (
+                      <TableRow 
+                        key={item.id} 
+                        className={`libra-table-row border-b border-border ${
+                          item.is_urgent ? 'libra-urgent' : ''
+                        }`}
+                      >
+                        <TableCell>
+                          <img 
+                            src={item.image_url} 
+                            alt={item.title}
+                            className="w-16 h-12 object-cover rounded-lg shadow-sm"
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center space-x-2">
+                            {item.is_urgent && (
+                              <div className="flex items-center space-x-1 text-red-600">
+                                <AlertTriangle className="h-4 w-4" />
+                                <span className="text-xs font-bold">🚨</span>
+                              </div>
+                            )}
+                            <span className="text-foreground">{item.title}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="libra-status-badge">
+                            {item.category}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={item.is_active ? 'default' : 'secondary'}
+                            className={item.is_active ? 'libra-active-badge' : 'libra-inactive-badge'}
+                          >
+                            {item.is_active ? 'Ativa' : 'Inativa'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {item.is_urgent && (
+                            <Badge variant="destructive" className="libra-urgent-badge">
+                              <AlertTriangle className="h-3 w-3" />
+                              <span className="ml-1">🚨 Urgente</span>
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDate(item.created_at)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenDialog(item)}
+                              className="libra-button-icon"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleStatus(item.id)}
+                              className="libra-button-icon"
+                            >
+                              {item.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="libra-button-icon text-red-600 hover:text-red-700 hover:bg-red-50">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="libra-card">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
+                                  <AlertDialogDescription className="text-muted-foreground">
+                                    Tem certeza que deseja excluir esta notícia? Esta ação não pode ser desfeita.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="libra-button-secondary">Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => handleDelete(item.id)}
+                                    className="bg-red-600 hover:bg-red-700 text-white"
+                                  >
+                                    Excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

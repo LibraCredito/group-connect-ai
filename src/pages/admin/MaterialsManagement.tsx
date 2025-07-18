@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,17 +50,20 @@ import {
   CheckSquare,
   Monitor,
   Filter,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MaterialItem {
   id: string;
   title: string;
-  content: string;
+  description: string;
   category: string;
-  image_url: string;
-  pdf_url?: string;
+  file_url: string;
+  file_type: string;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
   created_by: string;
@@ -68,44 +71,24 @@ interface MaterialItem {
 
 const MaterialsManagement = () => {
   const { toast } = useToast();
-  const [materials, setMaterials] = useState<MaterialItem[]>([
-    {
-      id: '1',
-      title: 'Guia Completo do Power BI',
-      content: 'Tutorial completo sobre como usar o Power BI para análise de propostas.',
-      category: 'Manual',
-      image_url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&h=400',
-      pdf_url: '/materials/powerbi-guide.pdf',
-      created_at: '2024-01-15T10:00:00Z',
-      updated_at: '2024-01-15T10:00:00Z',
-      created_by: 'admin',
-    },
-    {
-      id: '2',
-      title: 'FAQ - Perguntas Frequentes',
-      content: 'Respostas para as dúvidas mais comuns sobre o sistema.',
-      category: 'Tutorial',
-      image_url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&h=400',
-      created_at: '2024-01-10T09:15:00Z',
-      updated_at: '2024-01-10T09:15:00Z',
-      created_by: 'admin',
-    },
-  ]);
-
+  const [materials, setMaterials] = useState<MaterialItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<MaterialItem | null>(null);
   const [formData, setFormData] = useState({
     title: '',
-    content: '',
+    description: '',
     category: '',
-    image_url: '',
-    pdf_url: '',
+    file_url: '',
+    file_type: '',
+    is_active: true,
   });
 
   // Estados dos filtros
   const [filters, setFilters] = useState({
     category: 'all',
-    hasPdf: 'all', // 'all', 'with_pdf', 'without_pdf'
+    file_type: 'all',
+    status: 'all',
   });
 
   const categories = [
@@ -119,25 +102,65 @@ const MaterialsManagement = () => {
     'Treinamento'
   ];
 
-  const pdfOptions = [
-    { value: 'all', label: 'Todos' },
-    { value: 'with_pdf', label: 'Com PDF' },
-    { value: 'without_pdf', label: 'Sem PDF' }
+  const fileTypes = [
+    'PDF',
+    'DOC',
+    'DOCX',
+    'XLS',
+    'XLSX',
+    'PPT',
+    'PPTX',
+    'MP4',
+    'AVI',
+    'MOV',
+    'ZIP',
+    'RAR'
   ];
+
+  const fetchMaterials = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('materials')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar materiais:', error);
+        toast({
+          title: 'Erro',
+          description: 'Falha ao carregar os materiais.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setMaterials(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar materiais:', error);
+      toast({
+        title: 'Erro',
+        description: 'Falha ao carregar os materiais.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMaterials();
+  }, []);
 
   // Filtrar materiais com base nos filtros aplicados
   const filteredMaterials = useMemo(() => {
     return materials.filter(item => {
       const matchesCategory = filters.category === 'all' || item.category === filters.category;
+      const matchesFileType = filters.file_type === 'all' || item.file_type === filters.file_type;
+      const matchesStatus = filters.status === 'all' || 
+        (filters.status === 'active' ? item.is_active : !item.is_active);
       
-      let matchesPdf = true;
-      if (filters.hasPdf === 'with_pdf') {
-        matchesPdf = !!item.pdf_url;
-      } else if (filters.hasPdf === 'without_pdf') {
-        matchesPdf = !item.pdf_url;
-      }
-      
-      return matchesCategory && matchesPdf;
+      return matchesCategory && matchesFileType && matchesStatus;
     });
   }, [materials, filters]);
 
@@ -154,10 +177,11 @@ const MaterialsManagement = () => {
   const resetForm = () => {
     setFormData({
       title: '',
-      content: '',
+      description: '',
       category: '',
-      image_url: '',
-      pdf_url: '',
+      file_url: '',
+      file_type: '',
+      is_active: true,
     });
     setEditingMaterial(null);
   };
@@ -167,10 +191,11 @@ const MaterialsManagement = () => {
       setEditingMaterial(material);
       setFormData({
         title: material.title,
-        content: material.content,
+        description: material.description,
         category: material.category,
-        image_url: material.image_url,
-        pdf_url: material.pdf_url || '',
+        file_url: material.file_url,
+        file_type: material.file_type,
+        is_active: material.is_active,
       });
     } else {
       resetForm();
@@ -178,10 +203,10 @@ const MaterialsManagement = () => {
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.content || !formData.category || !formData.image_url) {
+    if (!formData.title || !formData.description || !formData.category || !formData.file_url) {
       toast({
         title: 'Erro',
         description: 'Por favor, preencha todos os campos obrigatórios.',
@@ -190,47 +215,117 @@ const MaterialsManagement = () => {
       return;
     }
 
-    if (editingMaterial) {
-      setMaterials(materials.map(item => 
-        item.id === editingMaterial.id 
-          ? { ...item, ...formData, updated_at: new Date().toISOString() }
-          : item
-      ));
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: 'Erro',
+          description: 'Usuário não autenticado.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (editingMaterial) {
+        const { error } = await supabase
+          .from('materials')
+          .update({
+            ...formData,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', editingMaterial.id);
+
+        if (error) {
+          console.error('Erro ao atualizar material:', error);
+          toast({
+            title: 'Erro',
+            description: 'Falha ao atualizar o material.',
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        toast({
+          title: 'Sucesso',
+          description: 'Material atualizado com sucesso!',
+        });
+      } else {
+        const { error } = await supabase
+          .from('materials')
+          .insert([{
+            ...formData,
+            created_by: user.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }]);
+
+        if (error) {
+          console.error('Erro ao criar material:', error);
+          toast({
+            title: 'Erro',
+            description: 'Falha ao criar o material.',
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        toast({
+          title: 'Sucesso',
+          description: 'Material criado com sucesso!',
+        });
+      }
+
+      setIsDialogOpen(false);
+      resetForm();
+      fetchMaterials();
+    } catch (error) {
+      console.error('Erro ao salvar material:', error);
       toast({
-        title: 'Sucesso',
-        description: 'Material atualizado com sucesso!',
-      });
-    } else {
-      const newMaterial: MaterialItem = {
-        id: Date.now().toString(),
-        ...formData,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        created_by: 'admin',
-      };
-      setMaterials([...materials, newMaterial]);
-      toast({
-        title: 'Sucesso',
-        description: 'Material criado com sucesso!',
+        title: 'Erro',
+        description: 'Falha ao salvar o material.',
+        variant: 'destructive',
       });
     }
-
-    setIsDialogOpen(false);
-    resetForm();
   };
 
-  const handleDelete = (id: string) => {
-    setMaterials(materials.filter(item => item.id !== id));
-    toast({
-      title: 'Sucesso',
-      description: 'Material excluído com sucesso!',
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('materials')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao excluir material:', error);
+        toast({
+          title: 'Erro',
+          description: 'Falha ao excluir o material.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      toast({
+        title: 'Sucesso',
+        description: 'Material excluído com sucesso!',
+      });
+      fetchMaterials();
+    } catch (error) {
+      console.error('Erro ao excluir material:', error);
+      toast({
+        title: 'Erro',
+        description: 'Falha ao excluir o material.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const clearFilters = () => {
     setFilters({
       category: 'all',
-      hasPdf: 'all',
+      file_type: 'all',
+      status: 'all',
     });
   };
 
@@ -243,6 +338,17 @@ const MaterialsManagement = () => {
       minute: '2-digit',
     });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Carregando materiais...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -308,40 +414,42 @@ const MaterialsManagement = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="image_url" className="text-sm font-medium text-gray-700">URL da Imagem de Capa *</Label>
+                      <Label htmlFor="file_url" className="text-sm font-medium text-gray-700">URL do Arquivo *</Label>
                       <Input
-                        id="image_url"
-                        value={formData.image_url}
-                        onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                        placeholder="https://exemplo.com/imagem.jpg"
+                        id="file_url"
+                        value={formData.file_url}
+                        onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
+                        placeholder="https://exemplo.com/arquivo.pdf"
                         className="w-full"
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="pdf_url" className="text-sm font-medium text-gray-700">URL do PDF (opcional)</Label>
-                      <Input
-                        id="pdf_url"
-                        value={formData.pdf_url}
-                        onChange={(e) => setFormData({ ...formData, pdf_url: e.target.value })}
-                        placeholder="https://exemplo.com/documento.pdf"
-                        className="w-full"
-                      />
-                      <p className="text-xs text-gray-500">
-                        Se fornecido, um botão de download será exibido no material
-                      </p>
+                      <Label htmlFor="file_type" className="text-sm font-medium text-gray-700">Tipo de Arquivo</Label>
+                      <Select value={formData.file_type} onValueChange={(value) => setFormData({ ...formData, file_type: value })}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {fileTypes.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="content" className="text-sm font-medium text-gray-700">Descrição *</Label>
+                    <Label htmlFor="description" className="text-sm font-medium text-gray-700">Descrição *</Label>
                     <Textarea
-                      id="content"
-                      value={formData.content}
-                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Digite a descrição do material"
-                      rows={8}
+                      rows={6}
                       className="w-full"
                       required
                     />
@@ -376,7 +484,7 @@ const MaterialsManagement = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-foreground">Categoria</Label>
                 <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value })}>
@@ -395,17 +503,32 @@ const MaterialsManagement = () => {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-foreground">Presença de PDF</Label>
-                <Select value={filters.hasPdf} onValueChange={(value) => setFilters({ ...filters, hasPdf: value })}>
+                <Label className="text-sm font-medium text-foreground">Tipo de Arquivo</Label>
+                <Select value={filters.file_type} onValueChange={(value) => setFilters({ ...filters, file_type: value })}>
                   <SelectTrigger className="libra-card border-border">
-                    <SelectValue placeholder="Todos" />
+                    <SelectValue placeholder="Todos os tipos" />
                   </SelectTrigger>
                   <SelectContent className="libra-card border-border">
-                    {pdfOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
+                    <SelectItem value="all">Todos os tipos</SelectItem>
+                    {fileTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">Status</Label>
+                <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
+                  <SelectTrigger className="libra-card border-border">
+                    <SelectValue placeholder="Todos os status" />
+                  </SelectTrigger>
+                  <SelectContent className="libra-card border-border">
+                    <SelectItem value="all">Todos os status</SelectItem>
+                    <SelectItem value="active">Ativo</SelectItem>
+                    <SelectItem value="inactive">Inativo</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -431,90 +554,102 @@ const MaterialsManagement = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="libra-table">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-b border-border">
-                    <TableHead className="font-semibold text-foreground">Imagem</TableHead>
-                    <TableHead className="font-semibold text-foreground">Título</TableHead>
-                    <TableHead className="font-semibold text-foreground">Categoria</TableHead>
-                    <TableHead className="font-semibold text-foreground">PDF</TableHead>
-                    <TableHead className="font-semibold text-foreground">Criado em</TableHead>
-                    <TableHead className="font-semibold text-foreground">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredMaterials.map((item) => {
-                    const CategoryIcon = getCategoryIcon(item.category);
-                    return (
-                      <TableRow key={item.id} className="libra-table-row border-b border-border">
-                        <TableCell>
-                          <img 
-                            src={item.image_url} 
-                            alt={item.title}
-                            className="w-16 h-12 object-cover rounded-lg shadow-sm"
-                          />
-                        </TableCell>
-                        <TableCell className="font-medium text-foreground">{item.title}</TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="libra-status-badge flex items-center space-x-1 w-fit">
-                            <CategoryIcon className="h-3 w-3" />
-                            <span>{item.category}</span>
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {item.pdf_url ? (
-                            <Badge variant="default" className="libra-active-badge flex items-center space-x-1 w-fit">
-                              <Download className="h-3 w-3" />
-                              <span>Disponível</span>
+            {filteredMaterials.length === 0 ? (
+              <div className="text-center py-8">
+                <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg">Nenhum material encontrado</p>
+                <p className="text-gray-400 text-sm">Clique em "Novo Material" para criar seu primeiro material</p>
+              </div>
+            ) : (
+              <div className="libra-table">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-border">
+                      <TableHead className="font-semibold text-foreground">Título</TableHead>
+                      <TableHead className="font-semibold text-foreground">Categoria</TableHead>
+                      <TableHead className="font-semibold text-foreground">Tipo</TableHead>
+                      <TableHead className="font-semibold text-foreground">Status</TableHead>
+                      <TableHead className="font-semibold text-foreground">Criado em</TableHead>
+                      <TableHead className="font-semibold text-foreground">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredMaterials.map((item) => {
+                      const CategoryIcon = getCategoryIcon(item.category);
+                      return (
+                        <TableRow key={item.id} className="libra-table-row border-b border-border">
+                          <TableCell className="font-medium text-foreground">{item.title}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="libra-status-badge flex items-center space-x-1 w-fit">
+                              <CategoryIcon className="h-3 w-3" />
+                              <span>{item.category}</span>
                             </Badge>
-                          ) : (
-                            <Badge variant="secondary" className="libra-inactive-badge">Sem PDF</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">{formatDate(item.created_at)}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleOpenDialog(item)}
-                              className="libra-button-icon"
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="libra-status-badge">
+                              {item.file_type}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant={item.is_active ? 'default' : 'secondary'}
+                              className={item.is_active ? 'libra-active-badge' : 'libra-inactive-badge'}
                             >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm" className="libra-button-icon text-red-600 hover:text-red-700 hover:bg-red-50">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent className="libra-card">
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
-                                  <AlertDialogDescription className="text-muted-foreground">
-                                    Tem certeza que deseja excluir este material? Esta ação não pode ser desfeita.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel className="libra-button-secondary">Cancelar</AlertDialogCancel>
-                                  <AlertDialogAction 
-                                    onClick={() => handleDelete(item.id)}
-                                    className="bg-red-600 hover:bg-red-700 text-white"
-                                  >
-                                    Excluir
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+                              {item.is_active ? 'Ativo' : 'Inativo'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">{formatDate(item.created_at)}</TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleOpenDialog(item)}
+                                className="libra-button-icon"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => window.open(item.file_url, '_blank')}
+                                className="libra-button-icon"
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="outline" size="sm" className="libra-button-icon text-red-600 hover:text-red-700 hover:bg-red-50">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="libra-card">
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
+                                    <AlertDialogDescription className="text-muted-foreground">
+                                      Tem certeza que deseja excluir este material? Esta ação não pode ser desfeita.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className="libra-button-secondary">Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction 
+                                      onClick={() => handleDelete(item.id)}
+                                      className="bg-red-600 hover:bg-red-700 text-white"
+                                    >
+                                      Excluir
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

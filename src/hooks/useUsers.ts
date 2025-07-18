@@ -12,7 +12,7 @@ export const useUsers = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('profiles')
+        .from('profiles' as any)
         .select(`
           *,
           groups:group_id (
@@ -39,8 +39,8 @@ export const useUsers = () => {
   const updateUser = async (userId: string, updates: Partial<User>) => {
     try {
       const { error } = await supabase
-        .from('profiles')
-        .update(updates)
+        .from('profiles' as any)
+        .update(updates as any)
         .eq('id', userId);
 
       if (error) throw error;

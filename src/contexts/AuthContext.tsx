@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('profiles' as any)
         .select(`
           *,
           groups:group_id (
@@ -136,8 +136,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!user) throw new Error('Usuário não autenticado');
 
       const { error } = await supabase
-        .from('profiles')
-        .update(data)
+        .from('profiles' as any)
+        .update(data as any)
         .eq('id', user.id);
 
       if (error) throw error;

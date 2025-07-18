@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from './pages/Index';
-import Register from './pages/Index';
+import { AuthProvider } from './contexts/AuthContext';
+import Index from './pages/Index';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UsersManagement from './pages/admin/UsersManagement';
 import GroupsManagement from './pages/admin/GroupsManagement';
@@ -17,28 +17,60 @@ import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import PublicLayout from './components/Layout/PublicLayout';
 import UserPortalLayout from './components/Layout/UserPortalLayout';
+import AdminSidebar from './components/Layout/AdminSidebar';
+import Header from './components/Layout/Header';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<PublicLayout><Login /></PublicLayout>} />
-        <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
-        <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/users" element={<ProtectedRoute><UsersManagement /></ProtectedRoute>} />
-        <Route path="/admin/groups" element={<ProtectedRoute><GroupsManagement /></ProtectedRoute>} />
-        <Route path="/admin/news" element={<ProtectedRoute><NewsManagement /></ProtectedRoute>} />
-        <Route path="/admin/materials" element={<ProtectedRoute><MaterialsManagement /></ProtectedRoute>} />
-        <Route path="/portal" element={<ProtectedRoute><UserPortalLayout /></ProtectedRoute>}>
-          <Route index element={<News />} />
-          <Route path="materials" element={<Materials />} />
-          <Route path="simulator" element={<Simulator />} />
-          <Route path="powerbi" element={<PowerBI />} />
-          <Route path="form" element={<FormProposal />} />
-        </Route>
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<PublicLayout><Index /></PublicLayout>} />
+          <Route path="/register" element={<PublicLayout><Index /></PublicLayout>} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/*" element={
+            <ProtectedRoute requiredRole="admin">
+              <SidebarProvider>
+                <div className="flex h-screen bg-gray-50">
+                  <AdminSidebar />
+                  <div className="flex-1 flex flex-col overflow-hidden">
+                    <Header />
+                    <main className="flex-1 overflow-auto">
+                      <Routes>
+                        <Route path="/" element={<AdminDashboard />} />
+                        <Route path="/users" element={<UsersManagement />} />
+                        <Route path="/groups" element={<GroupsManagement />} />
+                        <Route path="/news" element={<NewsManagement />} />
+                        <Route path="/materials" element={<MaterialsManagement />} />
+                      </Routes>
+                    </main>
+                  </div>
+                </div>
+              </SidebarProvider>
+            </ProtectedRoute>
+          } />
+
+          {/* Portal Routes */}
+          <Route path="/portal/*" element={
+            <ProtectedRoute>
+              <UserPortalLayout>
+                <Routes>
+                  <Route path="/" element={<News />} />
+                  <Route path="/materials" element={<Materials />} />
+                  <Route path="/simulator" element={<Simulator />} />
+                  <Route path="/powerbi" element={<PowerBI />} />
+                  <Route path="/form" element={<FormProposal />} />
+                </Routes>
+              </UserPortalLayout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

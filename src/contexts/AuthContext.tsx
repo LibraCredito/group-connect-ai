@@ -24,26 +24,20 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('profiles')
-        .select(`
-          *,
-          groups:group_id (
-            id,
-            name,
-            powerbi_link,
-            form_link
-          )
-        `)
+        .select('*')
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar perfil:', error);
+        return null;
+      }
       
       return data;
     } catch (error) {
@@ -87,8 +81,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         options: {
           data: {
             name: name,
-          },
-          emailRedirectTo: `${window.location.origin}/`,
+          }
         },
       });
 
@@ -96,7 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       toast({
         title: 'Conta criada com sucesso!',
-        description: 'Verificação de email pode ser necessária. Aguarde alguns instantes.',
+        description: 'Verificação de email pode ser necessária.',
       });
     } catch (error: any) {
       toast({
@@ -116,7 +109,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
 
       setUser(null);
-      setSession(null);
       
       toast({
         title: 'Logout realizado',
@@ -135,7 +127,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('profiles')
         .update(data)
         .eq('id', user.id);
@@ -159,51 +151,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    let mounted = true;
+    let isMounted = true;
 
-    // Configurar listener de mudanças de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-
-        console.log('Auth state changed:', event, session?.user?.id);
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
         
-        setSession(session);
-        
-        if (session?.user) {
-          // Buscar perfil do usuário quando logado
-          setTimeout(async () => {
-            if (!mounted) return;
-            
-            const profile = await fetchUserProfile(session.user.id);
-            if (profile && mounted) {
-              setUser({
-                id: profile.id,
-                email: session.user.email!,
-                name: profile.name,
-                role: profile.role,
-                group_id: profile.group_id,
-                created_at: profile.created_at,
-                updated_at: profile.updated_at,
-              });
-            }
-          }, 100);
-        } else {
-          setUser(null);
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    // Verificar sessão existente
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      
-      setSession(session);
-      if (session?.user) {
-        fetchUserProfile(session.user.id).then(profile => {
-          if (profile && mounted) {
+        if (session?.user && isMounted) {
+          const profile = await fetchUserProfile(session.user.id);
+          if (profile && isMounted) {
             setUser({
               id: profile.id,
               email: session.user.email!,
@@ -214,13 +170,50 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               updated_at: profile.updated_at,
             });
           }
-        });
+        }
+      } catch (error) {
+        console.error('Erro ao inicializar autenticação:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
-    });
+    };
+
+    // Configurar listener de mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!isMounted) return;
+
+        console.log('Auth state changed:', event);
+        
+        if (session?.user) {
+          const profile = await fetchUserProfile(session.user.id);
+          if (profile && isMounted) {
+            setUser({
+              id: profile.id,
+              email: session.user.email!,
+              name: profile.name,
+              role: profile.role,
+              group_id: profile.group_id,
+              created_at: profile.created_at,
+              updated_at: profile.updated_at,
+            });
+          }
+        } else {
+          setUser(null);
+        }
+        
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    );
+
+    initializeAuth();
 
     return () => {
-      mounted = false;
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);

@@ -1,76 +1,66 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, User, BookOpen, ArrowLeft, Eye, Download, FileText, Video, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 interface Material {
   id: string;
   title: string;
   description: string;
-  content: string;
-  type: 'pdf' | 'video' | 'link' | 'text';
-  url?: string;
-  image_url?: string;
+  file_url: string;
+  file_type: string;
+  category: string;
   created_at: string;
   updated_at: string;
   created_by: string;
+  is_active: boolean;
 }
 
 const Materials = () => {
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
+  const [materialsData, setMaterialsData] = useState<Material[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Dados simulados de materiais de apoio
-  const materialsData: Material[] = [
-    {
-      id: '1',
-      title: 'Guia Completo do Power BI',
-      description: 'Tutorial completo sobre como usar o Power BI para análise de propostas',
-      content: 'Este guia aborda todos os aspectos necessários para utilizar efetivamente o Power BI em sua análise de propostas.\n\nTópicos abordados:\n• Introdução ao Power BI\n• Navegação pela interface\n• Criação de filtros personalizados\n• Interpretação de gráficos e métricas\n• Exportação de relatórios\n• Dicas avançadas de análise\n\nPré-requisitos:\n• Acesso ao sistema\n• Conhecimento básico de computação\n• Dados de propostas disponíveis\n\nEste material foi criado para facilitar o aprendizado e maximizar o uso da ferramenta.',
-      type: 'pdf',
-      url: '/materials/powerbi-guide.pdf',
-      image_url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&h=400',
-      created_at: '2024-01-15T10:00:00Z',
-      updated_at: '2024-01-15T10:00:00Z',
-      created_by: 'admin',
-    },
-    {
-      id: '2',
-      title: 'Vídeo: Como Preencher Formulários',
-      description: 'Tutorial em vídeo mostrando passo a passo como preencher formulários de proposta',
-      content: 'Vídeo tutorial prático demonstrando como preencher corretamente os formulários de proposta.\n\nO que você aprenderá:\n• Acesso ao formulário\n• Preenchimento de campos obrigatórios\n• Upload de documentos\n• Validação de dados\n• Envio da proposta\n• Acompanhamento do status\n\nDuração: 15 minutos\nFormato: MP4 (1080p)\nIdioma: Português\n\nEste vídeo foi gravado com a versão mais recente do sistema.',
-      type: 'video',
-      url: 'https://youtube.com/watch?v=exemplo',
-      image_url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&h=400',
-      created_at: '2024-01-12T14:30:00Z',
-      updated_at: '2024-01-12T14:30:00Z',
-      created_by: 'admin',
-    },
-    {
-      id: '3',
-      title: 'FAQ - Perguntas Frequentes',
-      description: 'Respostas para as dúvidas mais comuns sobre o sistema',
-      content: 'Aqui estão as perguntas mais frequentes sobre o uso do sistema:\n\n1. Como faço para redefinir minha senha?\nR: Clique em "Esqueci minha senha" na tela de login e siga as instruções.\n\n2. Por que minha proposta foi rejeitada?\nR: Verifique se todos os documentos obrigatórios foram enviados e se as informações estão corretas.\n\n3. Quanto tempo demora para analisar uma proposta?\nR: O tempo médio é de 10-15 dias úteis, dependendo da complexidade.\n\n4. Como posso acompanhar o status da minha proposta?\nR: Acesse o dashboard Power BI onde você pode ver o status em tempo real.\n\n5. Posso editar uma proposta já enviada?\nR: Não, mas você pode enviar uma nova proposta com as correções necessárias.\n\nPara dúvidas não listadas aqui, entre em contato com o administrador.',
-      type: 'text',
-      image_url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&h=400',
-      created_at: '2024-01-10T09:15:00Z',
-      updated_at: '2024-01-10T09:15:00Z',
-      created_by: 'admin',
-    },
-    {
-      id: '4',
-      title: 'Portal de Treinamentos Online',
-      description: 'Acesso a cursos e treinamentos complementares',
-      content: 'Link para a plataforma de treinamentos online com cursos complementares.\n\nCursos disponíveis:\n• Fundamentos de análise de dados\n• Elaboração de propostas eficazes\n• Técnicas de apresentação\n• Gestão de projetos\n• Comunicação empresarial\n\nBenefícios:\n• Certificados de conclusão\n• Acesso vitalício\n• Suporte por email\n• Exercícios práticos\n• Fóruns de discussão\n\nPara acessar, clique no link e use suas credenciais do sistema.',
-      type: 'link',
-      url: 'https://treinamentos.exemplo.com',
-      image_url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&h=400',
-      created_at: '2024-01-08T16:45:00Z',
-      updated_at: '2024-01-08T16:45:00Z',
-      created_by: 'admin',
-    },
-  ];
+  useEffect(() => {
+    fetchMaterials();
+  }, []);
+
+  const fetchMaterials = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('materials')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching materials:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os materiais.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setMaterialsData(data || []);
+    } catch (error) {
+      console.error('Error fetching materials:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os materiais.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -102,7 +92,7 @@ const Materials = () => {
   };
 
   const getTypeIcon = (type: string) => {
-    switch (type) {
+    switch (type?.toLowerCase()) {
       case 'pdf': return FileText;
       case 'video': return Video;
       case 'link': return ExternalLink;
@@ -111,7 +101,7 @@ const Materials = () => {
   };
 
   const getTypeColor = (type: string) => {
-    switch (type) {
+    switch (type?.toLowerCase()) {
       case 'pdf': return 'bg-red-100 text-red-800';
       case 'video': return 'bg-blue-100 text-blue-800';
       case 'link': return 'bg-green-100 text-green-800';
@@ -120,16 +110,45 @@ const Materials = () => {
   };
 
   const getTypeLabel = (type: string) => {
-    switch (type) {
+    switch (type?.toLowerCase()) {
       case 'pdf': return 'PDF';
       case 'video': return 'VÍDEO';
       case 'link': return 'LINK';
-      case 'text': return 'TEXTO';
       default: return 'DOCUMENTO';
     }
   };
 
-  // Expanded material view (similar to news)
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-primary rounded-lg">
+            <BookOpen className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Material de Apoio</h1>
+            <p className="text-gray-600">Carregando materiais...</p>
+          </div>
+        </div>
+        <div className="grid gap-6">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="border-0 shadow-lg">
+              <CardContent className="p-6">
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Expanded material view
   if (selectedMaterial) {
     return (
       <div className="space-y-6 animate-fade-in">
@@ -152,9 +171,12 @@ const Materials = () => {
         <Card className="border-0 shadow-lg">
           <CardHeader>
             <div className="flex items-center space-x-2 mb-2">
-              <Badge className={getTypeColor(selectedMaterial.type)}>
-                {getTypeLabel(selectedMaterial.type)}
+              <Badge className={getTypeColor(selectedMaterial.file_type)}>
+                {getTypeLabel(selectedMaterial.file_type)}
               </Badge>
+              {selectedMaterial.category && (
+                <Badge variant="secondary">{selectedMaterial.category}</Badge>
+              )}
             </div>
             <CardTitle className="text-2xl text-gray-900">
               {selectedMaterial.title}
@@ -174,41 +196,25 @@ const Materials = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {selectedMaterial.image_url && (
-              <div className="mb-6">
-                <img 
-                  src={selectedMaterial.image_url} 
-                  alt={selectedMaterial.title}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-              </div>
-            )}
             <div className="prose prose-lg max-w-none">
-              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
-                {selectedMaterial.content}
+              <div className="whitespace-pre-line text-gray-700 leading-relaxed mb-6">
+                {selectedMaterial.description}
               </div>
             </div>
-            {selectedMaterial.url && (selectedMaterial.type === 'pdf' || selectedMaterial.type === 'link') && (
+            {selectedMaterial.file_url && (
               <div className="mt-6 flex gap-3">
                 <Button
-                  onClick={() => window.open(selectedMaterial.url, '_blank', 'noopener,noreferrer')}
+                  onClick={() => window.open(selectedMaterial.file_url, '_blank', 'noopener,noreferrer')}
                   className="flex items-center space-x-2"
                 >
-                  <Download className="h-4 w-4" />
+                  {selectedMaterial.file_type?.toLowerCase() === 'pdf' && <Download className="h-4 w-4" />}
+                  {selectedMaterial.file_type?.toLowerCase() === 'video' && <Video className="h-4 w-4" />}
+                  {selectedMaterial.file_type?.toLowerCase() === 'link' && <ExternalLink className="h-4 w-4" />}
                   <span>
-                    {selectedMaterial.type === 'pdf' ? 'Baixar Material em PDF' : 'Acessar Material'}
+                    {selectedMaterial.file_type?.toLowerCase() === 'pdf' ? 'Baixar Material' : 
+                     selectedMaterial.file_type?.toLowerCase() === 'video' ? 'Assistir Vídeo' : 
+                     'Acessar Material'}
                   </span>
-                </Button>
-              </div>
-            )}
-            {selectedMaterial.type === 'video' && selectedMaterial.url && (
-              <div className="mt-6">
-                <Button
-                  onClick={() => window.open(selectedMaterial.url, '_blank', 'noopener,noreferrer')}
-                  className="flex items-center space-x-2"
-                >
-                  <Video className="h-4 w-4" />
-                  <span>Assistir Vídeo</span>
                 </Button>
               </div>
             )}
@@ -218,7 +224,7 @@ const Materials = () => {
     );
   }
 
-  // Material listing view (similar to news)
+  // Material listing view
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
@@ -233,17 +239,20 @@ const Materials = () => {
 
       <div className="grid gap-6">
         {materialsData.map((material) => {
-          const TypeIcon = getTypeIcon(material.type);
+          const TypeIcon = getTypeIcon(material.file_type);
           return (
             <Card key={material.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-2">
-                      <Badge className={getTypeColor(material.type)}>
+                      <Badge className={getTypeColor(material.file_type)}>
                         <TypeIcon className="h-3 w-3 mr-1" />
-                        {getTypeLabel(material.type)}
+                        {getTypeLabel(material.file_type)}
                       </Badge>
+                      {material.category && (
+                        <Badge variant="secondary">{material.category}</Badge>
+                      )}
                     </div>
                     <CardTitle className="text-xl text-gray-900 mb-2">
                       {material.title}
@@ -268,20 +277,11 @@ const Materials = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex gap-4">
-                  {material.image_url && (
-                    <div className="flex-shrink-0">
-                      <img 
-                        src={material.image_url} 
-                        alt={material.title}
-                        className="w-32 h-24 object-cover rounded-lg"
-                      />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <p className="text-gray-700 leading-relaxed mb-4">
-                      {truncateContent(material.content)}
-                    </p>
+                <div className="flex justify-between items-center">
+                  <p className="text-gray-700 leading-relaxed">
+                    {truncateContent(material.description || '', 150)}
+                  </p>
+                  <div className="flex gap-2 ml-4">
                     <Button
                       variant="outline"
                       size="sm"
@@ -291,6 +291,18 @@ const Materials = () => {
                       <Eye className="h-4 w-4" />
                       <span>Visualizar</span>
                     </Button>
+                    {material.file_url && (
+                      <Button
+                        size="sm"
+                        onClick={() => window.open(material.file_url, '_blank', 'noopener,noreferrer')}
+                        className="flex items-center space-x-2"
+                      >
+                        {material.file_type?.toLowerCase() === 'pdf' && <Download className="h-4 w-4" />}
+                        {material.file_type?.toLowerCase() === 'video' && <Video className="h-4 w-4" />}
+                        {material.file_type?.toLowerCase() === 'link' && <ExternalLink className="h-4 w-4" />}
+                        <span>Acessar</span>
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>

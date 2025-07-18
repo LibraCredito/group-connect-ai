@@ -1,53 +1,54 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, User, Newspaper, ArrowLeft, Eye, AlertTriangle } from 'lucide-react';
 import { News as NewsType } from '@/types/auth';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 const News = () => {
   const [selectedNews, setSelectedNews] = useState<NewsType | null>(null);
+  const [newsData, setNewsData] = useState<NewsType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Dados simulados de notícias ativas
-  const newsData: NewsType[] = [
-    {
-      id: '1',
-      title: 'Nova Funcionalidade: Dashboard Avançado',
-      content: 'Estamos felizes em anunciar o lançamento do nosso novo dashboard com funcionalidades avançadas de análise e relatórios em tempo real. Esta atualização inclui gráficos interativos, filtros personalizados e exportação de dados.\n\nPrincipais recursos:\n• Visualizações em tempo real\n• Filtros avançados por período e categoria\n• Exportação de dados em múltiplos formatos\n• Interface mais intuitiva e responsiva\n• Relatórios automáticos por email\n\nEsta funcionalidade está disponível para todos os usuários a partir de hoje. Para acessar, clique na aba "Power BI" no menu principal.',
-      image_url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&h=400',
-      created_at: '2024-01-15T10:00:00Z',
-      updated_at: '2024-01-15T10:00:00Z',
-      created_by: 'admin',
-      category: 'Sistema',
-      is_urgent: false,
-      is_active: true,
-    },
-    {
-      id: '2',
-      title: 'Manutenção Programada do Sistema',
-      content: 'Informamos que será realizada uma manutenção programada no sistema no próximo domingo, das 02:00 às 06:00. Durante este período, o acesso poderá ser intermitente. Agradecemos a compreensão.\n\nDetalhes da manutenção:\n• Data: Domingo, 21 de janeiro de 2024\n• Horário: 02:00 às 06:00 (horário de Brasília)\n• Serviços afetados: Login, Dashboard, Formulários\n• Duração estimada: 4 horas\n\nApós a manutenção, o sistema funcionará com melhor performance e estabilidade.',
-      image_url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&h=400',
-      created_at: '2024-01-12T14:30:00Z',
-      updated_at: '2024-01-12T14:30:00Z',
-      created_by: 'admin',
-      category: 'Sistema',
-      is_urgent: true,
-      is_active: true,
-    },
-    {
-      id: '3',
-      title: 'Treinamento: Como Utilizar o Power BI',
-      content: 'Será realizado um treinamento online sobre como utilizar efetivamente o Power BI para análise de propostas. O treinamento acontecerá na próxima quinta-feira, às 14:00. Inscrições abertas.\n\nPrograma do treinamento:\n• Introdução ao Power BI\n• Navegação pela interface\n• Criação de filtros personalizados\n• Interpretação de gráficos e métricas\n• Exportação de relatórios\n• Sessão de perguntas e respostas\n\nPara se inscrever, entre em contato com o administrador do sistema.',
-      image_url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&h=400',
-      created_at: '2024-01-10T09:15:00Z',
-      updated_at: '2024-01-10T09:15:00Z',
-      created_by: 'admin',
-      category: 'Treinamento',
-      is_urgent: false,
-      is_active: true,
-    },
-  ];
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
+  const fetchNews = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('news')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching news:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar as notícias.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setNewsData(data || []);
+    } catch (error) {
+      console.error('Error fetching news:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as notícias.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -77,6 +78,36 @@ const News = () => {
     if (content.length <= maxLength) return content;
     return content.substring(0, maxLength) + '...';
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-primary rounded-lg">
+            <Newspaper className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Notícias</h1>
+            <p className="text-gray-600">Carregando notícias...</p>
+          </div>
+        </div>
+        <div className="grid gap-6">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="border-0 shadow-lg">
+              <CardContent className="p-6">
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (selectedNews) {
     return (

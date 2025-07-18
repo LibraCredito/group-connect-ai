@@ -84,7 +84,6 @@ const MaterialsManagement = () => {
     is_active: true,
   });
 
-  // Estados dos filtros
   const [filters, setFilters] = useState({
     category: 'all',
     file_type: 'all',
@@ -152,7 +151,6 @@ const MaterialsManagement = () => {
     fetchMaterials();
   }, []);
 
-  // Filtrar materiais com base nos filtros aplicados
   const filteredMaterials = useMemo(() => {
     return materials.filter(item => {
       const matchesCategory = filters.category === 'all' || item.category === filters.category;

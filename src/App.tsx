@@ -11,10 +11,8 @@ import MaterialsManagement from './pages/admin/MaterialsManagement';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import UserPortalLayout from './components/Layout/UserPortalLayout';
-import AdminSidebar from './components/Layout/AdminSidebar';
-import Header from './components/Layout/Header';
 import PublicLayout from './components/Layout/PublicLayout';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import AdminLayout from './components/Layout/AdminLayout';
 
 function App() {
   return (
@@ -37,88 +35,48 @@ function App() {
             </PublicLayout>
           } />
           
-          {/* Admin Routes - Só admin pode acessar */}
+          {/* Admin Routes */}
           <Route path="/admin" element={
             <ProtectedRoute requiredRole="admin">
-              <SidebarProvider>
-                <div className="flex h-screen bg-gray-50">
-                  <AdminSidebar />
-                  <div className="flex-1 flex flex-col overflow-hidden">
-                    <Header />
-                    <main className="flex-1 overflow-auto">
-                      <AdminDashboard />
-                    </main>
-                  </div>
-                </div>
-              </SidebarProvider>
+              <AdminLayout>
+                <AdminDashboard />
+              </AdminLayout>
             </ProtectedRoute>
           } />
           
           <Route path="/admin/users" element={
             <ProtectedRoute requiredRole="admin">
-              <SidebarProvider>
-                <div className="flex h-screen bg-gray-50">
-                  <AdminSidebar />
-                  <div className="flex-1 flex flex-col overflow-hidden">
-                    <Header />
-                    <main className="flex-1 overflow-auto">
-                      <UsersManagement />
-                    </main>
-                  </div>
-                </div>
-              </SidebarProvider>
+              <AdminLayout>
+                <UsersManagement />
+              </AdminLayout>
             </ProtectedRoute>
           } />
           
           <Route path="/admin/groups" element={
             <ProtectedRoute requiredRole="admin">
-              <SidebarProvider>
-                <div className="flex h-screen bg-gray-50">
-                  <AdminSidebar />
-                  <div className="flex-1 flex flex-col overflow-hidden">
-                    <Header />
-                    <main className="flex-1 overflow-auto">
-                      <GroupsManagement />
-                    </main>
-                  </div>
-                </div>
-              </SidebarProvider>
+              <AdminLayout>
+                <GroupsManagement />
+              </AdminLayout>
             </ProtectedRoute>
           } />
           
           <Route path="/admin/news" element={
             <ProtectedRoute requiredRole="admin">
-              <SidebarProvider>
-                <div className="flex h-screen bg-gray-50">
-                  <AdminSidebar />
-                  <div className="flex-1 flex flex-col overflow-hidden">
-                    <Header />
-                    <main className="flex-1 overflow-auto">
-                      <NewsManagement />
-                    </main>
-                  </div>
-                </div>
-              </SidebarProvider>
+              <AdminLayout>
+                <NewsManagement />
+              </AdminLayout>
             </ProtectedRoute>
           } />
           
           <Route path="/admin/materials" element={
             <ProtectedRoute requiredRole="admin">
-              <SidebarProvider>
-                <div className="flex h-screen bg-gray-50">
-                  <AdminSidebar />
-                  <div className="flex-1 flex flex-col overflow-hidden">
-                    <Header />
-                    <main className="flex-1 overflow-auto">
-                      <MaterialsManagement />
-                    </main>
-                  </div>
-                </div>
-              </SidebarProvider>
+              <AdminLayout>
+                <MaterialsManagement />
+              </AdminLayout>
             </ProtectedRoute>
           } />
 
-          {/* Portal Routes - Usuários comuns e coordenadores podem acessar */}
+          {/* Portal Routes */}
           <Route path="/portal/*" element={
             <ProtectedRoute>
               <UserPortalLayout />

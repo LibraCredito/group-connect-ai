@@ -29,8 +29,6 @@ const AdminSidebar = () => {
   const { signOut } = useAuth();
   const currentPath = location.pathname;
 
-  console.log('AdminSidebar - Current path:', currentPath);
-
   return (
     <div className={`${state === 'collapsed' ? 'w-16' : 'w-64'} libra-sidebar bg-sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out flex flex-col fixed top-0 left-0 h-screen z-40`}>
       {/* Header with toggle button */}
@@ -78,13 +76,13 @@ const AdminSidebar = () => {
                   to={item.url}
                   end={item.url === '/admin'}
                   className={({ isActive }) => {
-                    console.log(`NavLink ${item.title} - isActive:`, isActive, 'currentPath:', currentPath, 'itemUrl:', item.url);
+                    const active = isActive || (item.url === '/admin' && currentPath === '/admin');
                     return `flex items-center rounded-lg transition-all duration-200 relative ${
                       state === 'collapsed' 
                         ? 'justify-center p-3 w-12 h-12 mx-auto' 
                         : 'space-x-3 px-3 py-3'
                     } ${
-                      isActive
+                      active
                         ? 'bg-primary text-white shadow-md'
                         : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                     }`;

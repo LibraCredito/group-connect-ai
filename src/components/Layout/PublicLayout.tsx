@@ -5,7 +5,7 @@ interface PublicLayoutProps {
   children: React.ReactNode;
 }
 
-const PublicLayout = ({ children }: PublicLayoutProps) => {
+const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {children}

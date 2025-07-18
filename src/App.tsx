@@ -18,6 +18,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import UserPortalLayout from './components/Layout/UserPortalLayout';
 import AdminSidebar from './components/Layout/AdminSidebar';
 import Header from './components/Layout/Header';
+import PublicLayout from './components/Layout/PublicLayout';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
 function App() {
@@ -25,9 +26,21 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Index />} />
-          <Route path="/register" element={<Index />} />
+          <Route path="/" element={
+            <PublicLayout>
+              <Index />
+            </PublicLayout>
+          } />
+          <Route path="/login" element={
+            <PublicLayout>
+              <Index />
+            </PublicLayout>
+          } />
+          <Route path="/register" element={
+            <PublicLayout>
+              <Index />
+            </PublicLayout>
+          } />
           
           {/* Admin Routes */}
           <Route path="/admin/*" element={

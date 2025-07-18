@@ -7,7 +7,7 @@ import AuthForm from '@/components/auth/AuthForm';
 const Index = () => {
   const { user, loading } = useAuth();
 
-  console.log('Index - user:', user?.id, 'loading:', loading);
+  console.log('Index - user:', user?.id, 'loading:', loading, 'role:', user?.role);
 
   if (loading) {
     return (
@@ -26,8 +26,10 @@ const Index = () => {
 
   // Redirecionar baseado no papel do usuário
   if (user.role === 'admin') {
+    console.log('Redirecionando admin para /admin');
     return <Navigate to="/admin" replace />;
   } else {
+    console.log('Redirecionando usuário para /portal');
     return <Navigate to="/portal" replace />;
   }
 };

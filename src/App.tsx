@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Login from './pages/Index';
+import Register from './pages/Index';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UsersManagement from './pages/admin/UsersManagement';
 import GroupsManagement from './pages/admin/GroupsManagement';
@@ -13,9 +14,9 @@ import Simulator from './pages/portal/Simulator';
 import PowerBI from './pages/portal/PowerBI';
 import FormProposal from './pages/portal/FormProposal';
 import NotFound from './pages/NotFound';
-import ProtectedRoute from './components/ProtectedRoute';
-import PublicLayout from './components/PublicLayout';
-import UserPortalLayout from './components/UserPortalLayout';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import PublicLayout from './components/Layout/PublicLayout';
+import UserPortalLayout from './components/Layout/UserPortalLayout';
 
 function App() {
   return (

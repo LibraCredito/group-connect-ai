@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, AuthContextType } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
-import { Session } from '@supabase/supabase-js';
 import { toast } from '@/hooks/use-toast';
 
 const AuthContext = createContext<AuthContextType>({
@@ -160,11 +159,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (session?.user && isMounted) {
           const profile = await fetchUserProfile(session.user.id);
           if (profile && isMounted) {
+            // Validar se o role é um dos valores permitidos
+            const validRoles = ['admin', 'coordinator', 'user'] as const;
+            const role = validRoles.includes(profile.role as any) ? profile.role as 'admin' | 'coordinator' | 'user' : 'user';
+            
             setUser({
               id: profile.id,
               email: session.user.email!,
               name: profile.name,
-              role: profile.role,
+              role: role,
               group_id: profile.group_id,
               created_at: profile.created_at,
               updated_at: profile.updated_at,
@@ -190,11 +193,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (session?.user) {
           const profile = await fetchUserProfile(session.user.id);
           if (profile && isMounted) {
+            // Validar se o role é um dos valores permitidos
+            const validRoles = ['admin', 'coordinator', 'user'] as const;
+            const role = validRoles.includes(profile.role as any) ? profile.role as 'admin' | 'coordinator' | 'user' : 'user';
+            
             setUser({
               id: profile.id,
               email: session.user.email!,
               name: profile.name,
-              role: profile.role,
+              role: role,
               group_id: profile.group_id,
               created_at: profile.created_at,
               updated_at: profile.updated_at,

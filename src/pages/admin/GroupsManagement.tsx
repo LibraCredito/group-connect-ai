@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Users, ExternalLink } from 'lucide-react';
+import { Plus, Edit, Trash2, Users, ExternalLink, Building2 } from 'lucide-react';
 import { useGroups } from '@/hooks/useGroups';
 import { useUsers } from '@/hooks/useUsers';
 import { Group } from '@/types/auth';

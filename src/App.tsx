@@ -1,18 +1,21 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from './contexts/AuthContext';
 import Index from './pages/Index';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import UsersManagement from './pages/admin/UsersManagement';
-import GroupsManagement from './pages/admin/GroupsManagement';
-import NewsManagement from './pages/admin/NewsManagement';
-import MaterialsManagement from './pages/admin/MaterialsManagement';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import UserPortalLayout from './components/Layout/UserPortalLayout';
 import PublicLayout from './components/Layout/PublicLayout';
-import AdminLayout from './components/Layout/AdminLayout';
+
+// Novos componentes administrativos
+import { AdminLayout } from './components/admin/AdminLayout';
+import { Dashboard } from './pages/admin/Dashboard';
+import { Users } from './pages/admin/Users';
+import { Groups } from './pages/admin/Groups';
+import { News } from './pages/admin/News';
+import { Materials } from './pages/admin/Materials';
 
 function App() {
   return (
@@ -35,11 +38,11 @@ function App() {
             </PublicLayout>
           } />
           
-          {/* Admin Routes */}
+          {/* Rotas administrativas completamente reformuladas */}
           <Route path="/admin" element={
             <ProtectedRoute requiredRole="admin">
               <AdminLayout>
-                <AdminDashboard />
+                <Dashboard />
               </AdminLayout>
             </ProtectedRoute>
           } />
@@ -47,7 +50,7 @@ function App() {
           <Route path="/admin/users" element={
             <ProtectedRoute requiredRole="admin">
               <AdminLayout>
-                <UsersManagement />
+                <Users />
               </AdminLayout>
             </ProtectedRoute>
           } />
@@ -55,7 +58,7 @@ function App() {
           <Route path="/admin/groups" element={
             <ProtectedRoute requiredRole="admin">
               <AdminLayout>
-                <GroupsManagement />
+                <Groups />
               </AdminLayout>
             </ProtectedRoute>
           } />
@@ -63,7 +66,7 @@ function App() {
           <Route path="/admin/news" element={
             <ProtectedRoute requiredRole="admin">
               <AdminLayout>
-                <NewsManagement />
+                <News />
               </AdminLayout>
             </ProtectedRoute>
           } />
@@ -71,12 +74,12 @@ function App() {
           <Route path="/admin/materials" element={
             <ProtectedRoute requiredRole="admin">
               <AdminLayout>
-                <MaterialsManagement />
+                <Materials />
               </AdminLayout>
             </ProtectedRoute>
           } />
 
-          {/* Portal Routes */}
+          {/* Portal Routes - mantendo intacto */}
           <Route path="/portal/*" element={
             <ProtectedRoute>
               <UserPortalLayout />
@@ -85,6 +88,7 @@ function App() {
 
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Toaster />
       </AuthProvider>
     </Router>
   );

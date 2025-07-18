@@ -14,7 +14,173 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      groups: {
+        Row: {
+          coordinator_id: string | null
+          created_at: string | null
+          form_link: string | null
+          id: string
+          name: string
+          powerbi_link: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          coordinator_id?: string | null
+          created_at?: string | null
+          form_link?: string | null
+          id?: string
+          name: string
+          powerbi_link?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          coordinator_id?: string | null
+          created_at?: string | null
+          form_link?: string | null
+          id?: string
+          name?: string
+          powerbi_link?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groups_coordinator_id_fkey"
+            columns: ["coordinator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      materials: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          created_by: string
+          description: string | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          is_active: boolean | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materials_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      news: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string | null
+          created_by: string
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          is_urgent: boolean | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string | null
+          created_by: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          is_urgent?: boolean | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          is_urgent?: boolean | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          group_id: string | null
+          id: string
+          name: string
+          role: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          group_id?: string | null
+          id: string
+          name: string
+          role?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          group_id?: string | null
+          id?: string
+          name?: string
+          role?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

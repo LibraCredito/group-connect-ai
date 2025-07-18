@@ -2,18 +2,20 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, ExternalLink, AlertCircle, RefreshCw, CheckCircle } from 'lucide-react';
+import { FileText, ExternalLink, AlertCircle, RefreshCw, CheckCircle, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useGroups } from '@/hooks/useGroups';
 
 const FormProposal = () => {
   const { user } = useAuth();
+  const { groups } = useGroups();
   const [formLoaded, setFormLoaded] = useState(false);
   
-  // Simulação de dados do grupo do usuário
-  const groupData = {
-    name: 'Grupo Região Norte',
-    form_link: 'https://forms.ploomes.com/form/71ddb819ff34423593666ab06754953e',
-  };
+  // Buscar o grupo do usuário
+  const userGroup = groups.find(group => group.id === user?.group_id);
+  
+  // Verificar se o usuário tem acesso ao formulário
+  const hasAccess = user?.group_id && userGroup?.form_link;
 
   const handleFormLoad = () => {
     setFormLoaded(true);
@@ -22,6 +24,41 @@ const FormProposal = () => {
   const handleFormError = () => {
     setFormLoaded(false);
   };
+
+  // Se o usuário não pertence a nenhum grupo ou o grupo não tem link do formulário
+  if (!hasAccess) {
+    return (
+      <div className="w-full max-w-none space-y-6 animate-fade-in">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Formulário de Proposta</h1>
+          <p className="text-gray-600 mt-2">Preencha suas informações diretamente no portal</p>
+        </div>
+
+        <Card className="border-0 shadow-lg w-full">
+          <CardContent className="py-12">
+            <div className="text-center">
+              <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Acesso Restrito
+              </h3>
+              {!user?.group_id ? (
+                <p className="text-gray-600 mb-4">
+                  Você precisa ser vinculado a um grupo para acessar o formulário de proposta.
+                </p>
+              ) : !userGroup?.form_link ? (
+                <p className="text-gray-600 mb-4">
+                  Seu grupo ({userGroup?.name}) ainda não possui um formulário configurado.
+                </p>
+              ) : null}
+              <p className="text-sm text-gray-500">
+                Entre em contato com o administrador para obter acesso.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-none space-y-6 animate-fade-in">
@@ -40,12 +77,12 @@ const FormProposal = () => {
               <div>
                 <CardTitle className="text-xl text-green-900">Nova Proposta</CardTitle>
                 <CardDescription className="text-green-700">
-                  {groupData.name}
+                  {userGroup?.name}
                 </CardDescription>
               </div>
             </div>
             <Button
-              onClick={() => window.open(groupData.form_link, '_blank')}
+              onClick={() => window.open(userGroup?.form_link, '_blank')}
               variant="outline"
               size="sm"
               className="flex items-center space-x-2"
@@ -63,7 +100,7 @@ const FormProposal = () => {
                 <p className="text-sm text-yellow-800">
                   Se o conteúdo não aparecer, verifique sua conexão ou{' '}
                   <button
-                    onClick={() => window.open(groupData.form_link, '_blank')}
+                    onClick={() => window.open(userGroup?.form_link, '_blank')}
                     className="text-yellow-900 underline hover:text-yellow-700"
                   >
                     clique aqui para abrir em nova aba
@@ -84,7 +121,7 @@ const FormProposal = () => {
             )}
             
             <iframe
-              src={groupData.form_link}
+              src={userGroup?.form_link}
               width="100%"
               height="800"
               frameBorder="0"

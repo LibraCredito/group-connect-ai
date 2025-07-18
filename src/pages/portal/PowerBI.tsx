@@ -1,18 +1,21 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart3, ExternalLink, AlertCircle, RefreshCw } from 'lucide-react';
+import { BarChart3, ExternalLink, AlertCircle, RefreshCw, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useGroups } from '@/hooks/useGroups';
 
 const PowerBI = () => {
   const { user } = useAuth();
+  const { groups } = useGroups();
   const [powerBILoaded, setPowerBILoaded] = useState(false);
   
-  // Simulação de dados do grupo do usuário
-  const groupData = {
-    name: 'Grupo Região Norte',
-    powerbi_link: 'https://app.powerbi.com/view?r=eyJrIjoiOTBlMjEyNDQtYmYwOS00MDg0LWIxODUtZDYzNGNjNDEyYjg1IiwidCI6IjdmYzZhYTE4LWYxODUtNGQwZi1hYTdlLTQzZGIyNDc5ZGQwZCJ9',
-  };
+  // Buscar o grupo do usuário
+  const userGroup = groups.find(group => group.id === user?.group_id);
+  
+  // Verificar se o usuário tem acesso ao Power BI
+  const hasAccess = user?.group_id && userGroup?.powerbi_link;
 
   const handlePowerBILoad = () => {
     setPowerBILoaded(true);
@@ -21,6 +24,41 @@ const PowerBI = () => {
   const handlePowerBIError = () => {
     setPowerBILoaded(false);
   };
+
+  // Se o usuário não pertence a nenhum grupo ou o grupo não tem link do Power BI
+  if (!hasAccess) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard Power BI</h1>
+          <p className="text-gray-600 mt-2">Visualize em tempo real as métricas do seu grupo</p>
+        </div>
+
+        <Card className="border-0 shadow-lg">
+          <CardContent className="py-12">
+            <div className="text-center">
+              <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Acesso Restrito
+              </h3>
+              {!user?.group_id ? (
+                <p className="text-gray-600 mb-4">
+                  Você precisa ser vinculado a um grupo para acessar o dashboard Power BI.
+                </p>
+              ) : !userGroup?.powerbi_link ? (
+                <p className="text-gray-600 mb-4">
+                  Seu grupo ({userGroup?.name}) ainda não possui um dashboard Power BI configurado.
+                </p>
+              ) : null}
+              <p className="text-sm text-gray-500">
+                Entre em contato com o administrador para obter acesso.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -39,12 +77,12 @@ const PowerBI = () => {
               <div>
                 <CardTitle className="text-xl text-blue-900">Acompanhamento de Propostas</CardTitle>
                 <CardDescription className="text-blue-700">
-                  {groupData.name}
+                  {userGroup?.name}
                 </CardDescription>
               </div>
             </div>
             <Button
-              onClick={() => window.open(groupData.powerbi_link, '_blank')}
+              onClick={() => window.open(userGroup?.powerbi_link, '_blank')}
               variant="outline"
               size="sm"
               className="flex items-center space-x-2"
@@ -62,7 +100,7 @@ const PowerBI = () => {
                 <p className="text-sm text-yellow-800">
                   Se o conteúdo não aparecer, verifique sua conexão ou{' '}
                   <button
-                    onClick={() => window.open(groupData.powerbi_link, '_blank')}
+                    onClick={() => window.open(userGroup?.powerbi_link, '_blank')}
                     className="text-yellow-900 underline hover:text-yellow-700"
                   >
                     clique aqui para abrir em nova aba
@@ -83,7 +121,7 @@ const PowerBI = () => {
             )}
             
             <iframe
-              src={groupData.powerbi_link}
+              src={userGroup?.powerbi_link}
               width="100%"
               height="600"
               frameBorder="0"

@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -49,7 +50,7 @@ const AppRoutes = () => {
   const { user } = useAuth();
 
   if (!user) {
-    return null; // ProtectedRoute irá mostrar o formulário de login
+    return null; // ProtectedRoute irá mostrar o formulário de login/cadastro
   }
 
   return (

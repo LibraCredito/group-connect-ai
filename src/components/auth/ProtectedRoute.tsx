@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import LoginForm from '../LoginForm';
+import AuthForm from './AuthForm';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -20,7 +20,7 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   }
 
   if (!user) {
-    return <LoginForm />;
+    return <AuthForm />;
   }
 
   if (requiredRole && user.role !== requiredRole && user.role !== 'admin') {

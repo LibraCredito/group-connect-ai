@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,7 +27,7 @@ interface AdminLayoutContentProps {
   children: React.ReactNode;
 }
 
-const AdminLayoutContent = ({ children }: AdminLayoutContentProps) => {
+const AdminLayoutContent: React.FC<AdminLayoutContentProps> = ({ children }) => {
   const { state } = useSidebar();
   
   return (

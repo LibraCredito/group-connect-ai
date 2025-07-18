@@ -23,8 +23,8 @@ const Index = () => {
     return <AuthForm />;
   }
 
-  // Se chegou até aqui, o usuário está autenticado mas ainda não foi redirecionado
-  // Isso pode acontecer brevemente enquanto o redirecionamento está processando
+  // Se chegou até aqui, o usuário está autenticado
+  // O redirecionamento é feito pelo AuthContext
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">

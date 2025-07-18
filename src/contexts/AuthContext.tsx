@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('Buscando perfil do usuário:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -40,6 +41,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return null;
       }
       
+      console.log('Perfil encontrado:', data);
       return data;
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);
@@ -48,8 +50,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const handleUserAuthenticated = async (authUser: any) => {
-    const profile = await fetchUserProfile(authUser.id);
-    if (profile) {
+    try {
+      console.log('Processando autenticação do usuário:', authUser.id);
+      
+      const profile = await fetchUserProfile(authUser.id);
+      if (!profile) {
+        console.error('Perfil não encontrado para o usuário');
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       // Garantir que o role é válido
       const validRoles = ['admin', 'coordinator', 'user'] as const;
       const userRole = validRoles.includes(profile.role as any) ? profile.role as 'admin' | 'coordinator' | 'user' : 'user';
@@ -64,17 +75,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         updated_at: profile.updated_at,
       };
 
+      console.log('Dados do usuário processados:', userData);
       setUser(userData);
 
       // Redirecionamento automático baseado na role
-      console.log('Redirecionando usuário baseado na role:', userRole);
-      if (userRole === 'admin') {
-        console.log('Redirecionando admin para /admin');
-        navigate('/admin', { replace: true });
-      } else {
-        console.log('Redirecionando usuário/coordenador para /portal');
-        navigate('/portal', { replace: true });
-      }
+      console.log('Iniciando redirecionamento baseado na role:', userRole);
+      
+      // Usar setTimeout para evitar problemas de timing
+      setTimeout(() => {
+        try {
+          if (userRole === 'admin') {
+            console.log('Redirecionando admin para /admin');
+            navigate('/admin', { replace: true });
+          } else {
+            console.log('Redirecionando usuário/coordenador para /portal');
+            navigate('/portal', { replace: true });
+          }
+        } catch (navError) {
+          console.error('Erro no redirecionamento:', navError);
+        }
+      }, 100);
+      
+    } catch (error) {
+      console.error('Erro ao processar autenticação:', error);
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -182,15 +208,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const getSession = async () => {
       try {
+        console.log('Verificando sessão existente...');
         const { data: { session } } = await supabase.auth.getSession();
         
         if (mounted) {
           if (session?.user) {
+            console.log('Sessão encontrada, processando usuário...');
             await handleUserAuthenticated(session.user);
           } else {
+            console.log('Nenhuma sessão encontrada');
             setUser(null);
+            setLoading(false);
           }
-          setLoading(false);
         }
       } catch (error) {
         console.error('Erro ao buscar sessão:', error);
@@ -202,15 +231,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session?.user?.id);
+      console.log('Mudança no estado de autenticação:', event, session?.user?.id);
       
       if (mounted) {
         if (session?.user) {
           await handleUserAuthenticated(session.user);
         } else {
           setUser(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     });
 

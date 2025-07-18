@@ -28,7 +28,7 @@ interface AdminLayoutContentProps {
   children: React.ReactNode;
 }
 
-const AdminLayoutContent: React.FC<AdminLayoutContentProps> = ({ children }) => {
+const AdminLayoutContent = ({ children }: AdminLayoutContentProps) => {
   const { state } = useSidebar();
   
   return (

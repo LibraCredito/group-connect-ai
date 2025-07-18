@@ -11,8 +11,8 @@ export const useGroups = () => {
   const fetchGroups = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('groups' as any)
+      const { data, error } = await (supabase as any)
+        .from('groups')
         .select(`
           *,
           coordinator:coordinator_id (
@@ -38,9 +38,9 @@ export const useGroups = () => {
 
   const createGroup = async (groupData: Omit<Group, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      const { data, error } = await supabase
-        .from('groups' as any)
-        .insert([groupData as any])
+      const { data, error } = await (supabase as any)
+        .from('groups')
+        .insert([groupData])
         .select()
         .single();
 
@@ -66,9 +66,9 @@ export const useGroups = () => {
 
   const updateGroup = async (groupId: string, updates: Partial<Group>) => {
     try {
-      const { error } = await supabase
-        .from('groups' as any)
-        .update(updates as any)
+      const { error } = await (supabase as any)
+        .from('groups')
+        .update(updates)
         .eq('id', groupId);
 
       if (error) throw error;
@@ -93,8 +93,8 @@ export const useGroups = () => {
 
   const deleteGroup = async (groupId: string) => {
     try {
-      const { error } = await supabase
-        .from('groups' as any)
+      const { error } = await (supabase as any)
+        .from('groups')
         .delete()
         .eq('id', groupId);
 

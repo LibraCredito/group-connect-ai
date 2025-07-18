@@ -11,8 +11,8 @@ export const useUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('profiles' as any)
+      const { data, error } = await (supabase as any)
+        .from('profiles')
         .select(`
           *,
           groups:group_id (
@@ -38,9 +38,9 @@ export const useUsers = () => {
 
   const updateUser = async (userId: string, updates: Partial<User>) => {
     try {
-      const { error } = await supabase
-        .from('profiles' as any)
-        .update(updates as any)
+      const { error } = await (supabase as any)
+        .from('profiles')
+        .update(updates)
         .eq('id', userId);
 
       if (error) throw error;
